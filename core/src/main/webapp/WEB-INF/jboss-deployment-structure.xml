@@ -22,6 +22,7 @@ under the License.
   <deployment>
     <dependencies>
       <module name="org.apache.xalan"/>
+      <module name="com.mysql"/>
     </dependencies>
     <exclusions>
       <module name="org.hibernate"/>
