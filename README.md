@@ -6,7 +6,6 @@ Practical implementation of official advices at Syncope [wiki](https://cwiki.apa
 This projects assumes that you have
  1. [Apache Maven 3.0](http://maven.apache.org) installed
  1. a running JBoss instance, listening to port 8080
- 1. a MySQL datasource named <code>syncopeDataSource</code> referring to an empty db
 
 #### clone ####
 
@@ -27,7 +26,9 @@ $ mvn clean package
  1. <code>console/target/syncope-console.war</code>
 
 ## Notes ##
- 1. Currently on 1.0.0-incubating-SNAPSHOT, waiting for upcoming 1.0.0-incubating release.
+ 1. Currently on Apache Syncope 1.0.5
+ 1. Internal storage configured for in-memory H2 database instance, not using DataSource
+ 1. Many "java.lang.ClassNotFoundException" messages during application startup: harmless, just ignore them
  1. Not listenig on 8080? Just put the correct port in <code>console/src/main/resources/configuration.properties</code>, re-build and re-deploy
 
 ## Need more info? ##

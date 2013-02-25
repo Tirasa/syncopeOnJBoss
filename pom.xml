@@ -25,11 +25,11 @@ under the License.
   <parent>
     <groupId>org.apache.syncope</groupId>
     <artifactId>syncope</artifactId>
-    <version>1.0.0-incubating-SNAPSHOT</version>
+    <version>1.0.5</version>
   </parent>
 
   <properties>
-    <syncope.version>1.0.0-incubating-SNAPSHOT</syncope.version>
+    <syncope.version>1.0.5</syncope.version>
   </properties>
 
   <name>Apache Syncope on JBoss</name>
@@ -143,14 +143,4 @@ under the License.
     <module>core</module>
     <module>console</module>
   </modules>
-
-  <repositories>
-    <repository>
-      <id>ASF</id>
-      <url>https://repository.apache.org/content/repositories/snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
 </project>

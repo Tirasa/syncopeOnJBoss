@@ -86,11 +86,11 @@ under the License.
     <auth-method>CLIENT-CERT</auth-method>
   </login-config>
   
-  <resource-ref>
+  <!--<resource-ref>
     <res-ref-name>jdbc/syncopeDataSource</res-ref-name>
     <res-type>javax.sql.DataSource</res-type>
     <res-auth>Container</res-auth>
     <lookup-name>java:/syncopeDataSource</lookup-name>
-  </resource-ref>
+  </resource-ref>-->
 
 </web-app>
