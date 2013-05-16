@@ -25,7 +25,7 @@ under the License.
   <parent>
     <groupId>net.tirasa.syncope</groupId>
     <artifactId>jboss</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
   </parent>
 
   <name>Apache Syncope on JBoss core</name>
@@ -106,33 +106,6 @@ under the License.
       <type>war</type>
       <scope>test</scope>
     </dependency>
-<!-- Enable one or more of ConnId bundles below -->
-<!--    <dependency>
-      <groupId>org.connid.bundles.soap</groupId>
-      <artifactId>org.connid.bundles.soap</artifactId>
-      <scope>test</scope>
-    </dependency>-->
-<!--    <dependency>
-      <groupId>org.connid.bundles.soap</groupId>
-      <artifactId>wssample</artifactId>
-      <type>war</type>
-      <scope>test</scope>
-    </dependency>-->
-<!--    <dependency>
-      <groupId>org.connid.bundles.db</groupId>
-      <artifactId>org.connid.bundles.db.table</artifactId>
-      <scope>test</scope>
-    </dependency>-->
-<!--    <dependency>
-      <groupId>org.connid.bundles</groupId>
-      <artifactId>org.connid.bundles.csvdir</artifactId>
-      <scope>test</scope>
-    </dependency>-->
-<!--    <dependency>
-      <groupId>org.connid.bundles</groupId>
-      <artifactId>org.connid.bundles.ldap</artifactId>
-      <scope>test</scope>
-    </dependency>-->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -141,7 +114,6 @@ under the License.
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>

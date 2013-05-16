@@ -22,7 +22,6 @@ under the License.
   <deployment>
     <dependencies>
       <module name="org.apache.xalan"/>
-      <module name="com.h2database.h2"/>
     </dependencies>
     <exclusions>
       <module name="org.hibernate"/>
