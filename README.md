@@ -5,7 +5,7 @@ Practical implementation of official advices at Syncope [wiki](https://cwiki.apa
 
 This projects assumes that you have
  1. [Apache Maven 3.0](http://maven.apache.org) installed
- 1. a running JBoss instance, listening to port 8080
+ 1. a running JBoss AS 7.1.1 instance, listening to port 8080
 
 #### clone ####
 
