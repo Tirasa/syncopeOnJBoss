@@ -22,6 +22,7 @@ under the License.
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:context="http://www.springframework.org/schema/context"
        xmlns:oxm="http://www.springframework.org/schema/oxm"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://cxf.apache.org/jaxrs
@@ -29,19 +30,19 @@ under the License.
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/oxm
-                           http://www.springframework.org/schema/oxm/spring-oxm.xsd">
+                           http://www.springframework.org/schema/oxm/spring-oxm.xsd
+                           http://www.springframework.org/schema/aop 
+                           http://www.springframework.org/schema/aop/spring-aop.xsd">
 
+  <context:component-scan base-package="org.apache.syncope.core.rest.controller"/>
+  <bean class="${controllerHandler}"/>
+  <bean class="${attributableTransformer}"/>
+
+  <!-- CXF Configuration - BEGIN -->
   <import resource="classpath:META-INF/cxf/cxf.xml"/>
   <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
 
-  <context:component-scan base-package="org.apache.syncope.core.rest.controller"/>
-
-  <bean id="adminUser" class="java.lang.String">
-    <constructor-arg value="${adminUser}"/>
-  </bean>
-  
-  <!-- CXF Configuration - BEGIN -->
-  <context:component-scan base-package="org.apache.syncope.core.services"/>
+  <context:component-scan base-package="org.apache.syncope.core.services"/>  
 
   <bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider">
     <property name="depthProperties">
@@ -59,7 +60,9 @@ under the License.
     <property name="collectionWrapperMap">
       <map>
         <entry>
-          <key><value>org.apache.syncope.common.to.PolicyTO</value></key>
+          <key>
+            <value>org.apache.syncope.common.to.PolicyTO</value>
+          </key>
           <value>policies</value>
         </entry>
       </map>
@@ -119,6 +122,7 @@ under the License.
     <constructor-arg ref="xStreamXmlMarshaller"/>
   </bean>
 
+  <!-- Spring MVC Configuration - BEGIN -->
   <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
   <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
     <property name="messageConverters">
@@ -165,4 +169,6 @@ under the License.
 
     <property name="ignoreAcceptHeader" value="false"/>
   </bean>
+  <!-- Spring MVC Configuration - BEGIN -->
+
 </beans>

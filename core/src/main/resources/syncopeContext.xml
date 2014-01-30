@@ -32,12 +32,17 @@ under the License.
     <property name="locations">
       <list>
         <value>classpath:persistence.properties</value>
+        <value>classpath:rest.properties</value>
         <value>classpath:security.properties</value>
         <value>classpath:workflow.properties</value>
       </list>
     </property>
     <property name="ignoreResourceNotFound" value="true"/>
     <property name="ignoreUnresolvablePlaceholders" value="true"/>
+  </bean>
+
+  <bean id="adminUser" class="java.lang.String">
+    <constructor-arg value="${adminUser}"/>
   </bean>
 
   <bean class="org.apache.syncope.core.util.ApplicationContextProvider"/>
@@ -61,9 +66,6 @@ under the License.
             <value type="org.springframework.core.io.Resource">
               classpath:/quartz/${quartz.sql}
             </value>
-            <value type="org.springframework.core.io.Resource">
-              classpath:/logback/${logback.sql}
-            </value>
           </array>
         </property>
       </bean>
@@ -72,6 +74,7 @@ under the License.
 
   <bean id="propagationManager" class="org.apache.syncope.core.propagation.impl.PropagationManager"/>
   <bean id="propagationTaskExecutor" class="org.apache.syncope.core.propagation.impl.PriorityPropagationTaskExecutor"/>
+  <bean id="propagationReporter" class="org.apache.syncope.core.propagation.impl.DefaultPropagationReporter" scope="prototype"/>
 
   <bean id="notificationManager" class="org.apache.syncope.core.notification.NotificationManager"/>
 
@@ -88,8 +91,6 @@ under the License.
     <property name="lenient" value="true"/>
     <property name="silent" value="false"/>
   </bean>
-  
-  <bean id="jexlUtil" class="org.apache.syncope.core.util.JexlUtil"/>
   
   <bean id="virAttrCache" class="org.apache.syncope.core.util.VirAttrCache" scope="singleton">
     <constructor-arg value="60"/>
