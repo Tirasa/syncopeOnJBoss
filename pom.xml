@@ -25,11 +25,11 @@ under the License.
   <parent>
     <groupId>org.apache.syncope</groupId>
     <artifactId>syncope</artifactId>
-    <version>1.1.5</version>
+    <version>1.1.8</version>
   </parent>
 
   <properties>
-    <syncope.version>1.1.5</syncope.version>
+    <syncope.version>1.1.8</syncope.version>
   </properties>
 
   <name>Apache Syncope on JBoss</name>

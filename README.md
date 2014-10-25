@@ -26,7 +26,7 @@ $ mvn clean package
  1. <code>console/target/syncope-console.war</code>
 
 ## Notes ##
- 1. Currently on Apache Syncope 1.1.5
+ 1. Currently on Apache Syncope 1.1.8
  1. Internal storage configured for in-memory H2 database instance, not using DataSource
  1. Many <code>java.lang.ClassNotFoundException</code> messages during application startup: harmless, just ignore them
  1. Not listenig on 8080? Just put the correct port in <code>console/src/main/resources/configuration.properties</code>, re-build and re-deploy
