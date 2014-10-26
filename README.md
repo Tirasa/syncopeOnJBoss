@@ -1,6 +1,8 @@
 Apache Syncope overlay to be run in JBoss.<br/>
 Practical implementation of official advices at Syncope [wiki](https://cwiki.apache.org/confluence/display/SYNCOPE/Run+Syncope+in+real+environments).
 
+**This branch is for Apache Syncope 1.2 / Wildfly 8.1**: looking for [Apache Syncope 1.1 / JBoss AS 7.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_1_X)?
+
 ## How to test ##
 
 This projects assumes that you have
