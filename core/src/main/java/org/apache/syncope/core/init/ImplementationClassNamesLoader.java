@@ -26,20 +26,22 @@ import java.util.Set;
 import org.apache.syncope.core.persistence.validation.attrvalue.AlwaysTrueValidator;
 import org.apache.syncope.core.persistence.validation.attrvalue.BasicValidator;
 import org.apache.syncope.core.persistence.validation.attrvalue.EmailAddressValidator;
-import org.apache.syncope.core.propagation.DefaultPropagationActions;
 import org.apache.syncope.core.propagation.impl.LDAPMembershipPropagationActions;
+import org.apache.syncope.core.propagation.impl.LDAPPasswordPropagationActions;
+import org.apache.syncope.core.propagation.impl.DBPasswordPropagationActions;
 import org.apache.syncope.core.quartz.SampleJob;
 import org.apache.syncope.core.report.RoleReportlet;
 import org.apache.syncope.core.report.StaticReportlet;
 import org.apache.syncope.core.report.UserReportlet;
-import org.apache.syncope.core.sync.DefaultSyncActions;
 import org.apache.syncope.core.sync.impl.LDAPMembershipSyncActions;
+import org.apache.syncope.core.sync.impl.LDAPPasswordSyncActions;
+import org.apache.syncope.core.sync.impl.DBPasswordSyncActions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * Overrides default classloader-scanning behavior with static class names: for usage with JBoss.
+ * Overrides default classloader-scanning behavior with static class names: for usage with Wildfly.
  */
 @Component
 public class ImplementationClassNamesLoader {
@@ -49,7 +51,9 @@ public class ImplementationClassNamesLoader {
         REPORTLET,
         TASKJOB,
         SYNC_ACTIONS,
+        PUSH_ACTIONS,
         SYNC_CORRELATION_RULES,
+        PUSH_CORRELATION_RULES,
         PROPAGATION_ACTIONS,
         VALIDATOR
 
@@ -64,6 +68,9 @@ public class ImplementationClassNamesLoader {
 
     public void load() {
         classNames = new EnumMap<Type, Set<String>>(Type.class);
+        for (Type type : Type.values()) {
+            classNames.put(type, new HashSet<String>());
+        }
 
         Set<String> classes = new HashSet<String>();
         classes.add(UserReportlet.class.getName());
@@ -76,13 +83,15 @@ public class ImplementationClassNamesLoader {
         classNames.put(Type.TASKJOB, classes);
 
         classes = new HashSet<String>();
-        classes.add(DefaultSyncActions.class.getName());
         classes.add(LDAPMembershipSyncActions.class.getName());
+        classes.add(LDAPPasswordSyncActions.class.getName());
+        classes.add(DBPasswordSyncActions.class.getName());
         classNames.put(Type.SYNC_ACTIONS, classes);
 
         classes = new HashSet<String>();
-        classes.add(DefaultPropagationActions.class.getName());
         classes.add(LDAPMembershipPropagationActions.class.getName());
+        classes.add(LDAPPasswordPropagationActions.class.getName());
+        classes.add(DBPasswordPropagationActions.class.getName());
         classNames.put(Type.PROPAGATION_ACTIONS, classes);
 
         classes = new HashSet<String>();

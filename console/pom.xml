@@ -16,7 +16,6 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -25,31 +24,15 @@ under the License.
   <parent>
     <groupId>net.tirasa.syncope</groupId>
     <artifactId>jboss</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
   </parent>
 
   <name>Apache Syncope on JBoss console</name>
   <groupId>net.tirasa.syncope</groupId>
-  <artifactId>jboss-console</artifactId>
+  <artifactId>console</artifactId>
   <packaging>war</packaging>
 
   <dependencies>
-
-    <dependency>
-      <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket</artifactId>
-      <type>pom</type>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket-extensions</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket-spring</artifactId>
-    </dependency>
 
     <dependency>
       <groupId>org.apache.syncope</groupId>
@@ -66,18 +49,13 @@ under the License.
       <classifier>classes</classifier>
     </dependency>
 
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.wicket</groupId>
-      <artifactId>wicket-auth-roles</artifactId>
-      <type>jar</type>
-    </dependency>
-
     <!-- TEST -->
+    <dependency>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-webapp-explorer2</artifactId>            
+      <type>war</type>
+      <scope>test</scope>
+    </dependency>
     <dependency>
       <groupId>org.apache.syncope</groupId>
       <artifactId>syncope-build-tools</artifactId>
@@ -97,6 +75,12 @@ under the License.
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.connid.bundles.soap</groupId>
+      <artifactId>wssample</artifactId>
+      <type>war</type>
       <scope>test</scope>
     </dependency>
     <!-- /TEST -->    
@@ -128,22 +112,48 @@ under the License.
         <inherited>true</inherited>
         <executions>
           <execution>
-            <id>explodeSyncopeWAR</id>
+            <id>setupActivitiModeler</id>
+            <phase>process-resources</phase>
+            <configuration>
+              <target>
+                <unzip src="${settings.localRepository}/org/activiti/activiti-webapp-explorer2/${activiti.version}/activiti-webapp-explorer2-${activiti.version}.war"
+                       dest="${project.build.directory}/activiti-webapp-explorer2"/>
+                
+                <mkdir dir="${activiti-modeler.directory}"/>
+                
+                <mkdir dir="${activiti-modeler.directory}/editor"/>
+                <copy todir="${activiti-modeler.directory}/editor">
+                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/editor">
+                    <exclude name="oryx.js"/>
+                  </fileset>
+                </copy>
+                <copy file="${project.build.directory}/activiti-webapp-explorer2/WEB-INF/classes/plugins.xml"
+                      todir="${activiti-modeler.directory}/editor"/>
+                <copy file="${project.build.directory}/activiti-webapp-explorer2/WEB-INF/classes/stencilset.json"
+                      todir="${activiti-modeler.directory}/editor"/>
+                
+                <mkdir dir="${activiti-modeler.directory}/explorer"/>
+                <copy todir="${activiti-modeler.directory}/explorer">
+                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/explorer"/>
+                </copy>
+                
+                <mkdir dir="${activiti-modeler.directory}/libs"/>
+                <copy todir="${activiti-modeler.directory}/libs">
+                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/libs"/>
+                </copy>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>setupTestWebapp</id>
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <unzip src="${basedir}/../core/target/syncope.war" dest="${cargo.run.dir}">
-                  <patternset>
-                    <exclude name="**/content.xml" />
-                    <exclude name="**/persistence.properties" />
-                    <exclude name="**/security.properties" />
-                    <exclude name="**/workflow.properties" />
-                  </patternset>
-                </unzip>
+                <unzip src="${basedir}/../core/target/syncope.war" dest="${cargo.run.dir}"/>
                 <copy file="${project.build.directory}/test-classes/db.jsp" todir="${cargo.run.dir}"/>
-                <copy todir="${cargo.run.dir}/WEB-INF/classes" includeEmptyDirs="false">
-                  <fileset dir="${project.build.directory}/test-classes"/>
-                </copy>
               </target>
             </configuration>
             <goals>
@@ -155,7 +165,9 @@ under the License.
             <phase>pre-integration-test</phase>
             <configuration>
               <target>
-                <copy file="${project.build.directory}/test-classes/test.csv" todir="${java.io.tmpdir}" overwrite="true"/>
+                <copy file="${project.build.directory}/test-classes/test.csv" 
+                      todir="${test.csvdir.path}" 
+                      overwrite="true"/>
               </target>    
             </configuration>
             <goals>
@@ -164,7 +176,26 @@ under the License.
           </execution>
         </executions>
       </plugin>
-
+      
+      <plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <executions>
+          <execution>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>                   
+          </execution>
+        </executions>
+        <configuration>
+          <file>${activiti-modeler.directory}/editor/oryx.debug.js</file>
+          <tokenValueMap>${basedir}/src/main/resources/oryx.debug.js-tokenValueMap.properties</tokenValueMap>
+          <unescape>true</unescape>
+          <regex>false</regex>
+        </configuration>
+      </plugin>
+      
       <plugin>
         <groupId>org.codehaus.cargo</groupId>
         <artifactId>cargo-maven2-plugin</artifactId>
@@ -182,39 +213,42 @@ under the License.
             <type>standalone</type>
             <properties>
               <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
-              <cargo.jvmargs>-Xms512m -Xmx1024m -XX:PermSize=256m -XX:MaxPermSize=512m</cargo.jvmargs>
+              <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+              <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+
+              <cargo.jvmargs>-noverify -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:MaxPermSize=256m</cargo.jvmargs>
             </properties>
-            <deployables>
-              <deployable>
-                <location>${cargo.run.dir}</location>
-                <properties>
-                  <context>syncope</context>
-                </properties>
-              </deployable>
-              <deployable>
-                <location>${project.build.directory}/${project.build.finalName}.war</location>
-                <properties>
-                  <context>syncope-console</context>
-                </properties>
-              </deployable>
-              <deployable>
-                <groupId>org.connid.bundles.soap</groupId>
-                <artifactId>wssample</artifactId>
-                <type>war</type>
-                <properties>
-                  <context>wssample</context>
-                </properties>
-              </deployable>
-              <deployable>
-                <groupId>org.apache.syncope</groupId>
-                <artifactId>syncope-build-tools</artifactId>
-                <type>war</type>
-                <properties>
-                  <context>syncope-build-tools</context>
-                </properties>
-              </deployable>
-            </deployables>
           </configuration>
+          <deployables>
+            <deployable>
+              <location>${cargo.run.dir}</location>
+              <properties>
+                <context>syncope</context>
+              </properties>
+            </deployable>
+            <deployable>
+              <location>${project.build.directory}/${project.build.finalName}.war</location>
+              <properties>
+                <context>syncope-console</context>
+              </properties>
+            </deployable>
+            <deployable>
+              <groupId>org.connid.bundles.soap</groupId>
+              <artifactId>wssample</artifactId>
+              <type>war</type>
+              <properties>
+                <context>wssample</context>
+              </properties>
+            </deployable>
+            <deployable>
+              <groupId>org.apache.syncope</groupId>
+              <artifactId>syncope-build-tools</artifactId>
+              <type>war</type>
+              <properties>
+                <context>syncope-build-tools</context>
+              </properties>
+            </deployable>
+          </deployables>
         </configuration>
       </plugin>
             
@@ -242,9 +276,12 @@ under the License.
   <profiles>
     <profile>
       <id>embedded</id>
+      
       <properties>
-        <maven.test.skip>true</maven.test.skip>
+        <conf.directory>${project.build.directory}/test-classes</conf.directory>
+        <skipTests>true</skipTests>
       </properties>
+      
       <build>
         <defaultGoal>clean verify cargo:run</defaultGoal>    
       </build>

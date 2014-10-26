@@ -26,23 +26,41 @@ under the License.
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/task
-                           http://www.springframework.org/schema/task/spring-task-3.1.xsd">
+                           http://www.springframework.org/schema/task/spring-task.xsd">
 
-  <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+  <bean id="confDirectoryPropertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    <property name="order" value="1"/>
+    <property name="ignoreResourceNotFound" value="true"/>
+    <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    <property name="locations">
+      <list>
+        <value>file:${conf.directory}/persistence.properties</value>
+        <value>file:${conf.directory}/rest.properties</value>
+        <value>file:${conf.directory}/security.properties</value>
+        <value>file:${conf.directory}/connid.properties</value>
+        <value>file:${conf.directory}/workflow.properties</value>
+        <value>file:${conf.directory}/mail.properties</value>
+      </list>
+    </property>
+  </bean>
+  <bean id="classpathPropertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
     <property name="locations">
       <list>
         <value>classpath:persistence.properties</value>
         <value>classpath:rest.properties</value>
         <value>classpath:security.properties</value>
+        <value>classpath:connid.properties</value>
         <value>classpath:workflow.properties</value>
+        <value>classpath:mail.properties</value>
       </list>
     </property>
-    <property name="ignoreResourceNotFound" value="true"/>
-    <property name="ignoreUnresolvablePlaceholders" value="true"/>
   </bean>
-
+  
   <bean id="adminUser" class="java.lang.String">
     <constructor-arg value="${adminUser}"/>
+  </bean>
+  <bean id="anonymousUser" class="java.lang.String">
+    <constructor-arg value="${anonymousUser}"/>
   </bean>
 
   <bean class="org.apache.syncope.core.util.ApplicationContextProvider"/>
@@ -51,7 +69,9 @@ under the License.
   <context:component-scan base-package="org.apache.syncope.core.audit"/>
   <context:component-scan base-package="org.apache.syncope.core.connid"/>
   <context:component-scan base-package="org.apache.syncope.core.rest.data"/>
-  <context:component-scan base-package="org.apache.syncope.core.workflow"/>
+  <context:component-scan base-package="org.apache.syncope.core.workflow">
+    <context:exclude-filter type="regex" expression=".*\.activiti\..*"/>
+  </context:component-scan>
 
   <bean id="nonJPAdbInitializer" class="org.springframework.jdbc.datasource.init.DataSourceInitializer">
     <property name="dataSource" ref="dataSource"/>
@@ -76,13 +96,48 @@ under the License.
   <bean id="propagationTaskExecutor" class="org.apache.syncope.core.propagation.impl.PriorityPropagationTaskExecutor"/>
   <bean id="propagationReporter" class="org.apache.syncope.core.propagation.impl.DefaultPropagationReporter" scope="prototype"/>
 
-  <bean id="notificationManager" class="org.apache.syncope.core.notification.NotificationManager"/>
-
   <bean id="auditManager" class="org.apache.syncope.core.audit.AuditManager"/>
   
-  <bean id="connectorFacadeProxy" class="org.apache.syncope.core.propagation.impl.ConnectorFacadeProxy" scope="prototype"/>
-  <bean id="asyncConnFacade" class="org.apache.syncope.core.propagation.impl.AsyncConnectorFacade" scope="singleton"/>
+  <bean id="connIdBundleManager" class="org.apache.syncope.core.util.ConnIdBundleManager" scope="singleton">
+    <property name="stringLocations" value="${connid.locations}"/>
+  </bean>
   
+  <bean id="asyncConnFacade" class="org.apache.syncope.core.propagation.impl.AsyncConnectorFacade" scope="singleton"/>
+
+  <bean id="syncUtilities" class="org.apache.syncope.core.sync.SyncUtilities"/>
+  
+  <bean id="notificationManager" class="org.apache.syncope.core.notification.NotificationManager"/>
+
+  <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+    <property name="defaultEncoding" value="${smtpEncoding}"/>
+    <property name="host" value="${smtpHost}"/>
+    <property name="port" value="${smtpPort}"/>
+    <property name="username" value="${smtpUser}"/>
+    <property name="password" value="${smtpPassword}"/>
+    <property name="protocol" value="${smtpProtocol}"/>
+
+    <property name="javaMailProperties">
+      <props>
+        <prop key="mail.smtp.connectiontimeout">${smtpConnectionTimeout}</prop>
+        <prop key="mail.debug">${mailDebug}</prop>
+      </props>
+    </property>
+  </bean>
+
+  <bean id="velocityResourceLoader" class="org.apache.syncope.core.util.ResourceWithFallbackLoader">
+    <property name="primary" value="file:${conf.directory}/"/>
+    <property name="fallback" value="classpath:"/>
+  </bean>
+  <bean id="velocityEngine" class="org.apache.syncope.core.util.VelocityEngineFactoryBean">
+    <property name="resourceLoader" ref="velocityResourceLoader"/>
+  </bean>
+  <bean id="velocityToolManager" class="org.apache.velocity.tools.ToolManager">
+    <!-- autoConfigure -->
+    <constructor-arg index="0" value="true"/>
+    <!-- include default velocity tools -->
+    <constructor-arg index="1" value="true"/>
+  </bean>
+
   <task:annotation-driven executor="connectorExecutor"/>
   <task:executor id="connectorExecutor" pool-size="10"/>
   

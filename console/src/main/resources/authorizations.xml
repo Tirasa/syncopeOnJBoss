@@ -16,10 +16,13 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-
 -->
 <auth>
   <page id="Schema">
+    <action id="list">
+      <entitlement>SCHEMA_LIST</entitlement>
+    </action>
+
     <action id="create">
       <entitlement>SCHEMA_CREATE</entitlement>
     </action>
@@ -57,13 +60,17 @@ under the License.
     <action id="delete">
       <entitlement>USER_DELETE</entitlement>
     </action>
-
+    
     <action id="changeView">
       <entitlement>USER_VIEW</entitlement>
     </action>
   </page>
 
   <page id="Roles">
+    <action id="list">
+      <entitlement>ROLE_LIST</entitlement>
+    </action>
+
     <action id="create">
       <entitlement>ROLE_CREATE</entitlement>
     </action>
@@ -82,6 +89,10 @@ under the License.
   </page>
 
   <page id="Resources">
+    <action id="list">
+      <entitlement>RESOURCE_LIST</entitlement>
+    </action>
+
     <action id="create">
       <entitlement>RESOURCE_CREATE</entitlement>
     </action>
@@ -185,33 +196,21 @@ under the License.
     </action>
   </page>
     
-  <page id="UserRequest">
-    <action id="list">
-      <entitlement>USER_REQUEST_LIST</entitlement>
-    </action>
-    <action id="read">
-      <entitlement>USER_REQUEST_READ</entitlement>
-    </action>
-    <action id="delete">
-      <entitlement>USER_REQUEST_DELETE</entitlement>
-    </action>
-  </page>
-    
   <page id="Configuration">
     <action id="list">
       <entitlement>CONFIGURATION_LIST</entitlement>
     </action>
 
-    <action id="create">
-      <entitlement>CONFIGURATION_CREATE</entitlement>
+    <action id="export">
+      <entitlement>CONFIGURATION_EXPORT</entitlement>
     </action>
 
     <action id="read">
       <entitlement>CONFIGURATION_READ</entitlement>
     </action>
 
-    <action id="update">
-      <entitlement>CONFIGURATION_UPDATE</entitlement>
+    <action id="set">
+      <entitlement>CONFIGURATION_SET</entitlement>
     </action>
 
     <action id="delete">
@@ -261,6 +260,28 @@ under the License.
     </action>
   </page>
 
+  <page id="SecurityQuestion">
+    <action id="list">
+      <entitlement>SECURITY_QUESTION_LIST</entitlement>
+    </action>
+
+    <action id="create">
+      <entitlement>SECURITY_QUESTION_CREATE</entitlement>
+    </action>
+
+    <action id="read">
+      <entitlement>SECURITY_QUESTION_READ</entitlement>
+    </action>
+
+    <action id="update">
+      <entitlement>SECURITY_QUESTION_UPDATE</entitlement>
+    </action>
+
+    <action id="delete">
+      <entitlement>SECURITY_QUESTION_DELETE</entitlement>
+    </action>
+  </page>
+  
   <page id="Tasks">
     <action id="list">
       <entitlement>TASK_LIST</entitlement>

@@ -16,7 +16,6 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
-
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -25,19 +24,24 @@ under the License.
   <parent>
     <groupId>net.tirasa.syncope</groupId>
     <artifactId>jboss</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
   </parent>
 
   <name>Apache Syncope on JBoss core</name>
   <groupId>net.tirasa.syncope</groupId>
-  <artifactId>jboss-core</artifactId>
+  <artifactId>core</artifactId>
   <packaging>war</packaging>
 
   <dependencies>
 
     <dependency>
       <groupId>org.apache.syncope</groupId>
-      <artifactId>syncope-client</artifactId>
+      <artifactId>syncope-common</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.syncope</groupId>
+      <artifactId>syncope-common</artifactId>
+      <classifier>javadoc</classifier>
     </dependency>
     <dependency>
       <groupId>org.apache.syncope</groupId>
@@ -50,59 +54,21 @@ under the License.
       <classifier>classes</classifier>
     </dependency>
 
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet.jsp</groupId>
-      <artifactId>jsp-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>jstl</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-web</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-config</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.apache.geronimo.specs</groupId> 
-      <artifactId>geronimo-jpa_2.0_spec</artifactId> 
-    </dependency>
-    <dependency>
-      <groupId>org.apache.openjpa</groupId>
-      <artifactId>openjpa-jdbc</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.openjpa</groupId>
-      <artifactId>openjpa-persistence-jdbc</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>javax.validation</groupId>
-      <artifactId>validation-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.bval</groupId>
-      <artifactId>bval-jsr303</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
-    </dependency>
-
     <!-- TEST -->
     <dependency>
       <groupId>org.apache.syncope</groupId>
+      <artifactId>syncope-client</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.syncope</groupId>
       <artifactId>syncope-build-tools</artifactId>
+      <type>war</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.connid.bundles.soap</groupId>
+      <artifactId>wssample</artifactId>
       <type>war</type>
       <scope>test</scope>
     </dependency>
@@ -114,10 +80,6 @@ under the License.
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -153,14 +115,116 @@ under the License.
         <artifactId>maven-failsafe-plugin</artifactId>
         <inherited>true</inherited>
         <configuration>
-          <redirectTestOutputToFile>true</redirectTestOutputToFile>
-          <encoding>utf-8</encoding>
+          <systemPropertyVariables>
+            <jaxrsContentType>${jaxrs.content.type}</jaxrsContentType>
+          </systemPropertyVariables>
         </configuration>
         <executions>
           <execution>
             <id>verify</id>
             <goals>
               <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <inherited>true</inherited>
+        <executions>
+          <execution>
+            <id>setupTestWebapp</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <unzip src="${project.build.directory}/${project.build.finalName}.war" dest="${cargo.run.dir}"/>
+                <copy file="${project.build.directory}/test-classes/db.jsp" todir="${cargo.run.dir}"/>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>setupCSV</id>
+            <phase>pre-integration-test</phase>
+            <configuration>
+              <target>
+                <copy file="${project.build.directory}/test-classes/test.csv" 
+                      todir="${test.csvdir.path}" 
+                      overwrite="true"/>
+              </target>    
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.cargo</groupId>
+        <artifactId>cargo-maven2-plugin</artifactId>
+        <inherited>true</inherited>
+        <configuration>
+          <container>
+            <dependencies>
+              <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+              </dependency>
+            </dependencies>
+          </container>
+          <configuration>
+            <type>standalone</type>
+            <properties>
+              <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
+              <cargo.jvmargs>-noverify -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:MaxPermSize=256m</cargo.jvmargs>
+            </properties>
+          </configuration>
+          <deployables>
+            <deployable>
+              <location>${cargo.run.dir}</location>
+              <properties>
+                <context>syncope</context>
+              </properties>
+            </deployable>
+            <deployable>
+              <groupId>org.connid.bundles.soap</groupId>
+              <artifactId>wssample</artifactId>
+              <type>war</type>
+              <properties>
+                <context>wssample</context>
+              </properties>
+            </deployable>
+            <deployable>
+              <groupId>org.apache.syncope</groupId>
+              <artifactId>syncope-build-tools</artifactId>
+              <type>war</type>
+              <properties>
+                <context>syncope-build-tools</context>
+              </properties>
+            </deployable>
+          </deployables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>start-container</id>
+            <phase>pre-integration-test</phase>
+            <goals>
+              <goal>start</goal>
+            </goals>
+            <configuration>
+              <wait>false</wait>
+            </configuration>
+          </execution>
+          <execution>
+            <id>stop-container</id>
+            <phase>post-integration-test</phase>
+            <goals>
+              <goal>stop</goal>
             </goals>
           </execution>
         </executions>
@@ -198,6 +262,7 @@ under the License.
           </execution>
         </executions>
       </plugin>
+
     </plugins>
 
     <resources>
@@ -214,4 +279,44 @@ under the License.
       </testResource>
     </testResources>
   </build>
+  
+  <profiles>
+    <profile>
+      <id>debug</id>
+      
+      <properties>
+        <skipTests>true</skipTests>
+      </properties>
+      
+      <build>
+        <defaultGoal>clean verify cargo:run</defaultGoal>
+
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven2-plugin</artifactId>
+            <inherited>true</inherited>
+            <configuration>
+              <configuration>
+                <properties>
+                  <cargo.jvmargs>-Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n
+                    -noverify -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:MaxPermSize=256m</cargo.jvmargs>
+                </properties>
+              </configuration>
+            </configuration>
+            <executions>
+              <execution>
+                <id>start-container</id>
+                <phase>none</phase>
+              </execution>
+              <execution>
+                <id>stop-container</id>
+                <phase>none</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

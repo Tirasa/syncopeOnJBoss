@@ -21,7 +21,6 @@ under the License.
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:jaxrs="http://cxf.apache.org/jaxrs"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:oxm="http://www.springframework.org/schema/oxm"
        xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd
@@ -29,10 +28,10 @@ under the License.
                            http://cxf.apache.org/schemas/jaxrs.xsd
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context.xsd
-                           http://www.springframework.org/schema/oxm
-                           http://www.springframework.org/schema/oxm/spring-oxm.xsd
                            http://www.springframework.org/schema/aop 
                            http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+  <aop:aspectj-autoproxy/>
 
   <context:component-scan base-package="org.apache.syncope.core.rest.controller"/>
   <bean class="${controllerHandler}"/>
@@ -45,23 +44,23 @@ under the License.
   <context:component-scan base-package="org.apache.syncope.core.services"/>  
 
   <bean id="jaxbProvider" class="org.apache.cxf.jaxrs.provider.JAXBElementProvider">
+    <property name="namespacePrefixes">
+      <map>
+        <entry key="http://syncope.apache.org/1.2">
+          <value>syncope</value>
+        </entry>
+      </map>      
+    </property>
     <property name="depthProperties">
       <bean id="depthProperties" class="org.apache.cxf.staxutils.DocumentDepthProperties">
         <property name="innerElementCountThreshold" value="500"/>
       </bean>
     </property>
-    <property name="marshallerProperties">
-      <map>
-        <entry key="jaxb.formatted.output">
-          <value type="java.lang.Boolean">true</value>
-        </entry>
-      </map>
-    </property>
     <property name="collectionWrapperMap">
       <map>
         <entry>
           <key>
-            <value>org.apache.syncope.common.to.PolicyTO</value>
+            <value>org.apache.syncope.common.to.AbstractPolicyTO</value>
           </key>
           <value>policies</value>
         </entry>
@@ -69,37 +68,57 @@ under the License.
     </property>
   </bean>
 
-  <bean id="jsonProvider" class="org.codehaus.jackson.jaxrs.JacksonJaxbJsonProvider">
+  <bean id="jacksonObjectMapper" class="org.apache.syncope.core.rest.data.UnwrappedObjectMapper"/>
+  <bean id="jsonProvider" class="com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider">
     <property name="mapper" ref="jacksonObjectMapper"/>
   </bean>
 
   <bean id="exceptionMapper" class="org.apache.syncope.core.rest.utils.RestServiceExceptionMapper"/>
 
-  <jaxrs:server id="restContainer" address="/">
-    <jaxrs:serviceBeans>
-      <ref bean="connectorServiceImpl"/>
-      <ref bean="configurationServiceImpl"/>
-      <ref bean="entitlementServiceImpl"/>
-      <ref bean="loggerServiceImpl"/>
-      <ref bean="notificationServiceImpl"/>
-      <ref bean="policyServiceImpl"/>
-      <ref bean="reportServiceImpl"/>
-      <ref bean="resourceServiceImpl"/>
-      <ref bean="roleServiceImpl"/>
-      <ref bean="schemaServiceImpl"/>
-      <ref bean="taskServiceImpl"/>
-      <ref bean="userRequestServiceImpl"/>
-      <ref bean="userServiceImpl"/>
-      <ref bean="workflowServiceImpl"/>
-      <ref bean="userWorkflowServiceImpl"/>
-    </jaxrs:serviceBeans>
+  <bean id="validationProvider" class="org.apache.cxf.validation.BeanValidationProvider"/>
+  <bean id="validationInInterceptor" class="org.apache.cxf.jaxrs.validation.JAXRSBeanValidationInInterceptor">
+    <property name="provider" ref="validationProvider"/>
+  </bean>
+  <bean id="validationOutInterceptor" class="org.apache.cxf.jaxrs.validation.JAXRSBeanValidationOutInterceptor">
+    <property name="provider" ref="validationProvider"/>
+  </bean>   
+  
+  <bean id="searchContextProvider" class="org.apache.cxf.jaxrs.ext.search.SearchContextProvider"/>
+  
+  <bean id="wadlGenerator" class="org.apache.cxf.jaxrs.model.wadl.WadlGenerator">
+    <property name="applicationTitle" value="Apache Syncope ${syncope.version}"/>
+    <property name="namespacePrefix" value="syncope"/>
+    <property name="linkJsonToXmlSchema" value="true"/>
+    <property name="useJaxbContextForQnames" value="true"/>
+    <property name="ignoreMessageWriters" value="true"/>
+    <property name="addResourceAndMethodIds" value="true"/>
+    <property name="javaDocPath" value="/WEB-INF/lib/syncope-common-${syncope.version}-javadoc.jar"/>
+  </bean>
+  
+  <bean id="addETagFilter" class="org.apache.syncope.core.services.AddETagFilter"/>
+
+  <jaxrs:server id="restContainer" address="/" 
+                basePackages="org.apache.syncope.common.services, org.apache.syncope.core.services" 
+                staticSubresourceResolution="true">
     <jaxrs:resourceComparator>
-      <bean id="myServiceComparator" class="org.apache.syncope.core.rest.utils.QueryResourceInfoComparator"/>
+      <bean id="queryResourceInfoComparator" class="org.apache.syncope.core.rest.utils.QueryResourceInfoComparator"/>
     </jaxrs:resourceComparator>
+    <jaxrs:properties> 
+      <entry key="search.lax.property.match" value="true"/> 
+    </jaxrs:properties> 
+    <jaxrs:inInterceptors>
+      <ref bean="validationInInterceptor"/>
+    </jaxrs:inInterceptors>         
+    <jaxrs:outInterceptors>
+      <ref bean="validationOutInterceptor"/>
+    </jaxrs:outInterceptors>
     <jaxrs:providers>
       <ref bean="jaxbProvider"/>
       <ref bean="jsonProvider"/>
       <ref bean="exceptionMapper"/>
+      <ref bean="searchContextProvider"/>
+      <ref bean="wadlGenerator"/>
+      <ref bean="addETagFilter"/>
     </jaxrs:providers>
     <jaxrs:extensionMappings>
       <entry key="json" value="application/json;charset=UTF-8"/>
@@ -107,68 +126,5 @@ under the License.
     </jaxrs:extensionMappings>
   </jaxrs:server>
   <!-- CXF Configuration - END -->
-
-  <!-- JSON (via Jackson) -->
-  <bean id="jacksonObjectMapper" class="org.apache.syncope.core.rest.data.UnwrappedObjectMapper"/>
-  <bean id="mappingJacksonHttpMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
-    <property name="objectMapper" ref="jacksonObjectMapper"/>
-  </bean>
-
-  <!-- XML (via XStream) -->
-  <bean id="xStreamXmlMarshaller" class="org.springframework.oxm.xstream.XStreamMarshaller">
-    <property name="autodetectAnnotations" value="true"/>
-  </bean>
-  <bean id="mappingXstreamHttpMessageConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-    <constructor-arg ref="xStreamXmlMarshaller"/>
-  </bean>
-
-  <!-- Spring MVC Configuration - BEGIN -->
-  <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
-  <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-    <property name="messageConverters">
-      <list>
-        <ref bean="mappingJacksonHttpMessageConverter"/>
-        <ref bean="mappingXstreamHttpMessageConverter"/>
-      </list>
-    </property>
-  </bean>
-
-  <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-    <property name="mediaTypes">
-      <map>
-        <entry key="json" value="application/json;charset=UTF-8"/>
-        <entry key="xml" value="application/xml;charset=UTF-8"/>
-        <entry key="html" value="text/html;charset=UTF-8"/>
-      </map>
-    </property>
-    <property name="viewResolvers">
-      <list>
-        <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-          <property name="prefix" value="/"/>
-          <property name="suffix" value=".jsp"/>
-        </bean>
-      </list>
-    </property>
-    <property name="defaultViews">
-      <list>
-        <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
-          <property name="objectMapper" ref="jacksonObjectMapper"/>
-        </bean>
-        <bean class="org.springframework.web.servlet.view.xml.MarshallingView">
-          <constructor-arg ref="xStreamXmlMarshaller"/>
-        </bean>
-      </list>
-    </property>
-    <property name="defaultContentType">
-      <bean id="jsonMediaType" class="org.springframework.http.MediaType">
-        <constructor-arg value="application"/>
-        <constructor-arg value="json"/>
-        <constructor-arg value="UTF-8"/>
-      </bean>
-    </property>
-
-    <property name="ignoreAcceptHeader" value="false"/>
-  </bean>
-  <!-- Spring MVC Configuration - BEGIN -->
 
 </beans>
