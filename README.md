@@ -31,7 +31,7 @@ $ mvn clean package
  1. Currently on Apache Syncope 1.2.0
  1. Internal storage configured for in-memory H2 database instance, not using DataSource
  1. To avoid a whole lot of harmless yet annoyng error messages and stacktraces during core start-up, an overriden implementation was provided: see [issue 1](https://github.com/Tirasa/syncopeOnJBoss/issues/1) for more details
- 1. Not listenig on 8080? Just put the correct port in <code>console/src/main/resources/configuration.properties</code>, re-build and re-deploy
+ 1. Not listenig on 8080? Just put the correct port in <code>console/src/main/resources/console.properties</code>, re-build and re-deploy
 
 ## Need more info? ##
 Just drop an [e-mail](mailto:syncope@tirasa.net).
