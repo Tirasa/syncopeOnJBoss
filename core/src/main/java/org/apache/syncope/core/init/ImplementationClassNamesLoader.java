@@ -64,6 +64,9 @@ public class ImplementationClassNamesLoader {
 
     public void load() {
         classNames = new EnumMap<Type, Set<String>>(Type.class);
+        for (Type type : Type.values()) {
+            classNames.put(type, new HashSet<String>());
+        }
 
         Set<String> classes = new HashSet<String>();
         classes.add(UserReportlet.class.getName());
