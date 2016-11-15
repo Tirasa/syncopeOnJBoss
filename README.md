@@ -21,6 +21,7 @@ $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
 $ cd syncopeOnJBoss
 $ mvn clean package
 </pre>
+(or `mvn -Pall clean package` if wanting to include Activiti, Swagger and Apache Camel features)
 
 #### deploy ####
 
