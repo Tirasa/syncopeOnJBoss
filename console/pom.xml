@@ -23,89 +23,98 @@ under the License.
 
   <parent>
     <groupId>net.tirasa.syncope</groupId>
-    <artifactId>jboss</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <artifactId>wildfly</artifactId>
+    <version>2.0-SNAPSHOT</version>
   </parent>
 
-  <name>Apache Syncope on JBoss console</name>
+  <name>Apache Syncope on Wildfly - Console</name>
   <groupId>net.tirasa.syncope</groupId>
-  <artifactId>console</artifactId>
+  <artifactId>syncope-console</artifactId>
   <packaging>war</packaging>
 
   <dependencies>
 
-    <dependency>
-      <groupId>org.apache.syncope</groupId>
-      <artifactId>syncope-client</artifactId>
+    <dependency> 
+      <groupId>javax.servlet</groupId> 
+      <artifactId>javax.servlet-api</artifactId> 
     </dependency>
     <dependency>
-      <groupId>org.apache.syncope</groupId>
-      <artifactId>syncope-console</artifactId>
-      <type>war</type>
+      <groupId>javax.servlet.jsp</groupId>
+      <artifactId>javax.servlet.jsp-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.apache.syncope</groupId>
-      <artifactId>syncope-console</artifactId>
-      <classifier>classes</classifier>
+      <groupId>javax.servlet</groupId>
+      <artifactId>jstl</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>net.tirasa.syncope</groupId>
+      <artifactId>syncope-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>  
+    
+    <dependency>
+      <groupId>org.apache.syncope.client</groupId>
+      <artifactId>syncope-client-console</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.lmax</groupId>
+      <artifactId>disruptor</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>jquery-ui</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>codemirror</artifactId>
+    </dependency>    
+
     <!-- TEST -->
-    <dependency>
-      <groupId>org.activiti</groupId>
-      <artifactId>activiti-webapp-explorer2</artifactId>            
-      <type>war</type>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.syncope</groupId>
-      <artifactId>syncope-build-tools</artifactId>
-      <type>war</type>
-      <scope>test</scope>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.connid.bundles.soap</groupId>
-      <artifactId>wssample</artifactId>
+      <groupId>org.activiti</groupId>
+      <artifactId>activiti-webapp-explorer2</artifactId>            
       <type>war</type>
       <scope>test</scope>
     </dependency>
-    <!-- /TEST -->    
   </dependencies>
 
   <build>
     <finalName>syncope-console</finalName>
 
     <plugins>
-      
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <inherited>true</inherited>
-        <executions>
-          <execution>
-            <id>set-bundles</id>
-            <phase>process-test-resources</phase>
-            <goals>
-              <goal>copy</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-            
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-antrun-plugin</artifactId>
@@ -116,142 +125,56 @@ under the License.
             <phase>process-resources</phase>
             <configuration>
               <target>
-                <unzip src="${settings.localRepository}/org/activiti/activiti-webapp-explorer2/${activiti.version}/activiti-webapp-explorer2-${activiti.version}.war"
-                       dest="${project.build.directory}/activiti-webapp-explorer2"/>
+                <unzip src="${settings.localRepository}/org/activiti/activiti-webapp-explorer2/${activiti.version}/activiti-webapp-explorer2-${activiti.version}.war" 
+                       dest="${project.build.directory}/activiti-webapp-explorer2" />
                 
-                <mkdir dir="${activiti-modeler.directory}"/>
-                
-                <mkdir dir="${activiti-modeler.directory}/editor"/>
-                <copy todir="${activiti-modeler.directory}/editor">
-                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/editor">
-                    <exclude name="oryx.js"/>
-                  </fileset>
-                </copy>
-                <copy file="${project.build.directory}/activiti-webapp-explorer2/WEB-INF/classes/plugins.xml"
-                      todir="${activiti-modeler.directory}/editor"/>
-                <copy file="${project.build.directory}/activiti-webapp-explorer2/WEB-INF/classes/stencilset.json"
-                      todir="${activiti-modeler.directory}/editor"/>
-                
-                <mkdir dir="${activiti-modeler.directory}/explorer"/>
-                <copy todir="${activiti-modeler.directory}/explorer">
-                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/explorer"/>
-                </copy>
-                
-                <mkdir dir="${activiti-modeler.directory}/libs"/>
-                <copy todir="${activiti-modeler.directory}/libs">
-                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/libs"/>
-                </copy>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>setupTestWebapp</id>
-            <phase>pre-integration-test</phase>
-            <configuration>
-              <target>
-                <unzip src="${basedir}/../core/target/syncope.war" dest="${cargo.run.dir}"/>
-                <copy file="${project.build.directory}/test-classes/db.jsp" todir="${cargo.run.dir}"/>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>setupCSV</id>
-            <phase>pre-integration-test</phase>
-            <configuration>
-              <target>
-                <copy file="${project.build.directory}/test-classes/test.csv" 
-                      todir="${test.csvdir.path}" 
-                      overwrite="true"/>
-              </target>    
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      
-      <plugin>
-        <groupId>com.google.code.maven-replacer-plugin</groupId>
-        <artifactId>replacer</artifactId>
-        <executions>
-          <execution>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>replace</goal>
-            </goals>                   
-          </execution>
-        </executions>
-        <configuration>
-          <file>${activiti-modeler.directory}/editor/oryx.debug.js</file>
-          <tokenValueMap>${basedir}/src/main/resources/oryx.debug.js-tokenValueMap.properties</tokenValueMap>
-          <unescape>true</unescape>
-          <regex>false</regex>
-        </configuration>
-      </plugin>
-      
-      <plugin>
-        <groupId>org.codehaus.cargo</groupId>
-        <artifactId>cargo-maven2-plugin</artifactId>
-        <inherited>true</inherited>
-        <configuration>
-          <container>
-            <dependencies>
-              <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-              </dependency>
-            </dependencies>
-          </container>
-          <configuration>
-            <type>standalone</type>
-            <properties>
-              <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
-              <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
-              <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+                <mkdir dir="${activiti-modeler.directory}" />
+                <copy file="${project.build.directory}/activiti-webapp-explorer2/modeler.html" 
+                      todir="${activiti-modeler.directory}" />
+                <replace file="${activiti-modeler.directory}/modeler.html"
+                         token="&lt;/head&gt;"
+                         value="&lt;script type=&quot;text/javascript&quot;&gt;window.onunload = refreshParent; function refreshParent() { window.opener.location.reload(); }&lt;/script&gt;&lt;/head&gt;"/>
+                <copy file="${project.build.directory}/activiti-webapp-explorer2/WEB-INF/classes/stencilset.json" 
+                      todir="${activiti-modeler.directory}" />
 
-              <cargo.jvmargs>-noverify -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:MaxPermSize=256m</cargo.jvmargs>
-            </properties>
-          </configuration>
-          <deployables>
-            <deployable>
-              <location>${cargo.run.dir}</location>
-              <properties>
-                <context>syncope</context>
-              </properties>
-            </deployable>
-            <deployable>
-              <location>${project.build.directory}/${project.build.finalName}.war</location>
-              <properties>
-                <context>syncope-console</context>
-              </properties>
-            </deployable>
-            <deployable>
-              <groupId>org.connid.bundles.soap</groupId>
-              <artifactId>wssample</artifactId>
-              <type>war</type>
-              <properties>
-                <context>wssample</context>
-              </properties>
-            </deployable>
-            <deployable>
-              <groupId>org.apache.syncope</groupId>
-              <artifactId>syncope-build-tools</artifactId>
-              <type>war</type>
-              <properties>
-                <context>syncope-build-tools</context>
-              </properties>
-            </deployable>
-          </deployables>
-        </configuration>
+                <mkdir dir="${activiti-modeler.directory}/editor-app" />
+                <copy todir="${activiti-modeler.directory}/editor-app">
+                  <fileset dir="${project.build.directory}/activiti-webapp-explorer2/editor-app" />                  
+                </copy>
+                <replaceregexp file="${activiti-modeler.directory}/editor-app/editor/oryx.debug.js"
+                               match="ORYX.CONFIG.ROOT_PATH =.*&quot;editor/&quot;; //TODO: Remove last slash!!"
+                               replace="BASE_PATH = window.location.toString().substr(0, window.location.toString().indexOf(&#39;/wicket&#39;));
+ORYX.CONFIG.ROOT_PATH = BASE_PATH + &quot;/activiti-modeler/editor-app/editor/&quot;;"
+                               byline="true"/>
+                <replace file="${activiti-modeler.directory}/editor-app/editor/oryx.debug.js"
+                         token="new Ajax.Request(ACTIVITI.CONFIG.contextRoot + &#39;/editor/stencilset?version=&#39; + Date.now(), {"
+                         value="new Ajax.Request(window.location.toString().substr(0, window.location.toString().indexOf(&#39;/activiti-modeler&#39;)) + &quot;/activiti-modeler/stencilset.json&quot;, {"/>
+                <replace file="${activiti-modeler.directory}/editor-app/editor/oryx.debug.js"
+                         token="ORYX.Editor.createByUrl(modelUrl);"
+                         value="modelUrl = BASE_PATH + &quot;/workflowDefGET&quot;;
+ORYX.Editor.createByUrl(modelUrl);"/>
+                <replace file="${activiti-modeler.directory}/editor-app/editor/oryx.debug.js"
+                         token="ORYX.Editor.createByUrl = function(modelUrl){"
+                         value="modelUrl = BASE_PATH + &quot;/workflowDefGET&quot;;
+ORYX.Editor.createByUrl = function(modelUrl){"/>                
+                <replace file="${activiti-modeler.directory}/editor-app/configuration/toolbar-default-actions.js"
+                         token="window.location.href = &quot;./&quot;;"
+                         value="window.close();"/>
+                                               
+                <copy file="${basedir}/src/main/resources/url-config.js" 
+                      todir="${activiti-modeler.directory}/editor-app/configuration"
+                      overwrite="true" />
+                <copy file="${basedir}/src/main/resources/save-model.html" 
+                      todir="${activiti-modeler.directory}/editor-app/popups"
+                      overwrite="true" />
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
-            
     </plugins>
 
     <resources>
@@ -266,25 +189,144 @@ under the License.
         <directory>src/test/resources</directory>
         <filtering>true</filtering>
       </testResource>
-      <testResource>
-        <directory>../core/src/test/resources</directory>
-        <filtering>true</filtering>
-      </testResource>
     </testResources>
   </build>
-    
+
   <profiles>
     <profile>
       <id>embedded</id>
       
       <properties>
         <conf.directory>${project.build.directory}/test-classes</conf.directory>
-        <skipTests>true</skipTests>
       </properties>
       
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.syncope.fit</groupId>
+          <artifactId>syncope-fit-build-tools</artifactId>
+          <version>${syncope.version}</version>
+          <type>war</type>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>net.tirasa.connid.bundles.soap</groupId>
+          <artifactId>wssample</artifactId>
+          <type>war</type>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.h2database</groupId>
+          <artifactId>h2</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
+      
       <build>
-        <defaultGoal>clean verify cargo:run</defaultGoal>    
+        <defaultGoal>clean verify cargo:run</defaultGoal>  
+        
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <inherited>true</inherited>
+            <executions>
+              <execution>
+                <id>setupEmbeddedConf</id>
+                <phase>package</phase>
+                <configuration>
+                  <target>
+                    <delete dir="../core/target/syncope/WEB-INF/classes/domains"/>
+                    <copy todir="../core/target/syncope/WEB-INF/classes/domains">
+                      <fileset dir="../core/target/test-classes/domains"/>
+                    </copy>
+                    <copy file="../core/target/test-classes/connid.properties" 
+                          todir="../core/target/syncope/WEB-INF/classes" 
+                          overwrite="true"/>
+                    <copy file="../core/target/test-classes/db.jsp" 
+                          todir="../core/target/syncope" 
+                          overwrite="true"/>
+
+                    <copy file="${project.build.directory}/test-classes/console.properties" 
+                          todir="${project.build.directory}/${project.build.finalName}/WEB-INF/classes" 
+                          overwrite="true"/>
+                  </target>
+                </configuration>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+      
+          <plugin>
+            <groupId>org.codehaus.cargo</groupId>
+            <artifactId>cargo-maven2-plugin</artifactId>
+            <inherited>true</inherited>
+            <configuration>
+              <container>
+                <dependencies>
+                  <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                  </dependency>
+                </dependencies>
+              </container>
+              <configuration>
+                <type>standalone</type>
+                <properties>
+                  <cargo.servlet.port>${cargo.servlet.port}</cargo.servlet.port>
+                  <cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
+                  <cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
+
+                  <cargo.jvmargs>-noverify -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:MaxPermSize=256m</cargo.jvmargs>
+                </properties>
+              </configuration>
+              <deployables>
+                <deployable>
+                  <groupId>net.tirasa.connid.bundles.soap</groupId>
+                  <artifactId>wssample</artifactId>
+                  <type>war</type>
+                  <properties>
+                    <context>wssample</context>
+                  </properties>
+                </deployable>
+                <deployable>
+                  <groupId>org.apache.syncope.fit</groupId>
+                  <artifactId>syncope-fit-build-tools</artifactId>
+                  <type>war</type>
+                  <properties>
+                    <context>syncope-fit-build-tools</context>
+                  </properties>
+                </deployable>
+                <deployable>
+                  <location>../core/target/syncope</location>
+                  <properties>
+                    <context>syncope</context>
+                  </properties>
+                </deployable>
+                <deployable>
+                  <location>${project.build.directory}/${project.build.finalName}</location>
+                  <properties>
+                    <context>syncope-console</context>
+                  </properties>
+                </deployable>
+              </deployables>
+            </configuration>
+          </plugin>
+        </plugins>  
       </build>
-    </profile>    
+    </profile>
+    
+    <profile>
+      <id>all</id>
+      
+      <dependencies>
+        <dependency>
+          <groupId>org.apache.syncope.ext.camel</groupId>
+          <artifactId>syncope-ext-camel-client-console</artifactId>
+          <version>${syncope.version}</version>
+        </dependency> 
+      </dependencies>
+    </profile>
   </profiles>
 </project>

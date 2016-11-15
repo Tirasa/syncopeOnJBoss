@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
+<?xml version="1.0" encoding="UTF-8"?><!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -16,113 +15,82 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
--->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0          http://maven.apache.org/maven-v4_0_0.xsd">
+--><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.apache.syncope</groupId>
     <artifactId>syncope</artifactId>
-    <version>1.2.0</version>
+    <version xmlns="">2.0.1</version>
   </parent>
 
   <properties>
-    <syncope.version>1.2.0</syncope.version>
-    <secretKey>secretKeyXXX</secretKey>
-    <anonymousKey>anonymousKeyXXX</anonymousKey>
+    <syncope.version xmlns="">2.0.1</syncope.version>
+    <secretKey>asdsda2233323uu</secretKey>
+    <anonymousKey>sfsagdfsgd444</anonymousKey>
+    
+    <rat.skip>true</rat.skip>
+    <checkstyle.skip>true</checkstyle.skip>
   </properties>
 
-  <name>Apache Syncope on JBoss</name>
+  <name>Apache Syncope on Wildfly</name>
   <groupId>net.tirasa.syncope</groupId>
-  <artifactId>jboss</artifactId>
-  <version>1.2-SNAPSHOT</version>
+  <artifactId>wildfly</artifactId>
+  <version>2.0-SNAPSHOT</version>
   <packaging>pom</packaging>
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-common</artifactId>
+      <dependency>  
+        <groupId>org.apache.syncope.common</groupId>
+        <artifactId>syncope-common-lib</artifactId>
         <version>${syncope.version}</version>
-      </dependency> 
- 
-      <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-common</artifactId>
-        <version>${syncope.version}</version>
-        <classifier>javadoc</classifier>
       </dependency>
 
       <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-client</artifactId>
+        <groupId>org.apache.syncope.core</groupId>
+        <artifactId>syncope-core-rest-cxf</artifactId>
         <version>${syncope.version}</version>
-      </dependency> 
+      </dependency>
+      <dependency>
+        <groupId>org.apache.syncope.core</groupId>
+        <artifactId>syncope-core-workflow-java</artifactId>
+        <version>${syncope.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.syncope.core</groupId>
+        <artifactId>syncope-core-persistence-jpa</artifactId>
+        <version>${syncope.version}</version>
+	<exclusions>
+	  <exclusion>
+	    <groupId>org.apache.bval</groupId>
+	    <artifactId>bval-jsr</artifactId>
+	  </exclusion>
+	</exclusions>
+      </dependency>
+    
+      <dependency>
+        <groupId>org.apache.syncope.core</groupId>
+        <artifactId>syncope-core-workflow-activiti</artifactId>
+        <version>${syncope.version}</version>
+      </dependency>
+        
+      <dependency>
+        <groupId>org.apache.syncope.client</groupId>
+        <artifactId>syncope-client-console</artifactId>
+        <version>${syncope.version}</version>
+      </dependency>
 
       <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-build-tools</artifactId>
+        <groupId>org.apache.syncope.client</groupId>
+        <artifactId>syncope-client-enduser</artifactId>
         <version>${syncope.version}</version>
-        <type>war</type>
-        <scope>test</scope>
-      </dependency> 
-            
-      <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-core</artifactId>
-        <version>${syncope.version}</version>
-        <type>war</type>
-      </dependency> 
-      <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-core</artifactId>
-        <version>${syncope.version}</version>
-        <classifier>classes</classifier>
-        <scope>provided</scope>
-      </dependency> 
-
-      <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-console</artifactId>
-        <version>${syncope.version}</version>
-        <type>war</type>
-      </dependency> 
-      <dependency>
-        <groupId>org.apache.syncope</groupId>
-        <artifactId>syncope-console</artifactId>
-        <version>${syncope.version}</version>
-        <classifier>classes</classifier>
-        <scope>provided</scope>
-      </dependency> 
+      </dependency>
     </dependencies>
   </dependencyManagement>
     
-  <build>
-    
-    <pluginManagement>
-      <plugins>
-        <!-- Disable LICENSE / NOTICE inclusion: see SYNCOPE-84 -->
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-war-plugin</artifactId>
-          <inherited>false</inherited>
-          <configuration>
-            <webResources>
-              <resource>
-                <directory>src/main/webapp</directory>
-                <includes>
-                  <include>**/*.jsp</include>
-                </includes>
-                <filtering>true</filtering>
-              </resource>
-            </webResources>
-          </configuration>
-        </plugin>
-      </plugins>
-    </pluginManagement>
-    
-    <!-- Disable legal check for generated projects: see SYNCOPE-84 -->
+  <build>    
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -137,25 +105,14 @@ under the License.
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <inherited>true</inherited>
-        <executions>
-          <execution>
-            <goals>
-              <goal>check</goal>
-            </goals>
-            <phase>none</phase>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
     
   <modules>
+    <module>common</module>
     <module>core</module>
     <module>console</module>
+    <module>enduser</module>
   </modules>
 
 </project>

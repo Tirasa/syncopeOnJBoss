@@ -37,19 +37,15 @@ under the License.
 
   <loggers>
 
-    <asyncLogger name="org.apache.syncope.client" additivity="false" level="OFF">
+    <asyncLogger name="org.apache.syncope.client.lib" additivity="false" level="OFF">
       <appender-ref ref="main"/>
     </asyncLogger>
 
-    <asyncLogger name="org.apache.syncope.console" additivity="false" level="ERROR">
+    <asyncLogger name="org.apache.syncope.client.console" additivity="false" level="ERROR">
       <appender-ref ref="main"/>
     </asyncLogger>
 
     <asyncLogger name="org.apache.wicket" additivity="false" level="ERROR">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-
-    <asyncLogger name="org.springframework" additivity="false" level="ERROR">
       <appender-ref ref="main"/>
     </asyncLogger>
     

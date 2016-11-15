@@ -68,84 +68,65 @@ under the License.
         <SizeBasedTriggeringPolicy size="250 MB"/>
       </Policies>
     </RollingRandomAccessFile>
-
-    <!-- Audit -->    
-    <Jdbc name="audit" tableName="SYNCOPEAUDIT">
-      <ConnectionFactory class="org.apache.syncope.core.audit.AuditConnectionFactory" method="getConnection" />
-      <Column name="EVENT_DATE" isEventTimestamp="true"/>
-      <Column name="LOGGER_LEVEL" pattern="%level" isUnicode="false"/>
-      <Column name="LOGGER" pattern="%logger" isUnicode="false"/>
-      <Column name="MESSAGE" pattern="%message" isUnicode="false"/>
-      <Column name="THROWABLE" pattern="%ex{full}" isUnicode="false"/>
-    </Jdbc>
-
+    
   </appenders>
   
   <loggers>
     
-    <asyncLogger name="org.apache.syncope.common" additivity="false" level="OFF">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-
     <asyncLogger name="org.apache.syncope.core.persistence" additivity="false" level="INFO">
       <appender-ref ref="persistence"/>
     </asyncLogger>
+    <asyncLogger name="org.springframework.orm" additivity="false" level="INFO">
+      <appender-ref ref="persistence"/>
+    </asyncLogger>
     
-    <asyncLogger name="org.apache.syncope.core.security" additivity="false" level="INFO">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-
-    <asyncLogger name="org.apache.syncope.core.quartz" additivity="false" level="INFO">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-    <asyncLogger name="org.apache.syncope.core.sync" additivity="false" level="INFO">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-    <asyncLogger name="org.apache.syncope.core.notification" additivity="false" level="INFO">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-    <asyncLogger name="org.apache.syncope.core.report" additivity="false" level="INFO">
-      <appender-ref ref="main"/>
-    </asyncLogger>
-  
     <asyncLogger name="org.apache.syncope.core.rest" additivity="false" level="INFO">
+      <appender-ref ref="rest"/>
+    </asyncLogger>
+    <asyncLogger name="org.springframework.web" additivity="false" level="INFO">
+      <appender-ref ref="rest"/>
+    </asyncLogger>
+    <asyncLogger name="org.apache.http" additivity="false" level="INFO">
+      <appender-ref ref="rest"/>
+    </asyncLogger>
+    <asyncLogger name="org.apache.cxf" additivity="false" level="ERROR">
       <appender-ref ref="rest"/>
     </asyncLogger>
     
     <asyncLogger name="org.identityconnectors" additivity="false" level="DEBUG">
       <appender-ref ref="connid"/>
     </asyncLogger>
-    <asyncLogger name="org.connid" additivity="false" level="DEBUG">
+    <asyncLogger name="net.tirasa.connid" additivity="false" level="DEBUG">
       <appender-ref ref="connid"/>
     </asyncLogger>
-    <asyncLogger name="org.apache.syncope.core.connid" additivity="false" level="DEBUG">
-      <appender-ref ref="connid"/>
-    </asyncLogger>
-    <asyncLogger name="org.apache.syncope.core.util.ConnIdBundleManager" additivity="false" level="INFO">
+    <asyncLogger name="org.apache.syncope.core.provisioning.api.ConnIdBundleManager" additivity="false" level="INFO">
       <appender-ref ref="connid"/>
     </asyncLogger>
     
+    <asyncLogger name="org.apache.syncope" additivity="false" level="INFO">
+      <appender-ref ref="main"/>
+    </asyncLogger>
+    <asyncLogger name="org.apache.syncope.core.provisioning" additivity="false" level="INFO">
+      <appender-ref ref="main"/>
+    </asyncLogger>
+    <asyncLogger name="org.apache.syncope.core.logic" additivity="false" level="INFO">
+      <appender-ref ref="main"/>
+    </asyncLogger>
     <asyncLogger name="org.springframework" additivity="false" level="INFO">
       <appender-ref ref="main"/>
     </asyncLogger>
-    <asyncLogger name="org.springframework.orm" additivity="false" level="INFO">
-      <appender-ref ref="persistence"/>
+    <asyncLogger name="org.quartz" additivity="false" level="INFO">
+      <appender-ref ref="main"/>
     </asyncLogger>
-    <asyncLogger name="org.springframework.web" additivity="false" level="INFO">
-      <appender-ref ref="rest"/>
+    <asyncLogger name="org.activiti" additivity="false" level="ERROR">
+      <appender-ref ref="main"/>
     </asyncLogger>
-
-    <asyncLogger name="org.apache.http" additivity="false" level="INFO">
-      <appender-ref ref="rest"/>
+    <asyncLogger name="org.apache.camel" additivity="false" level="ERROR">
+      <appender-ref ref="main"/>
     </asyncLogger>
-
-    <asyncLogger name="org.apache.cxf" additivity="false" level="ERROR">
-      <appender-ref ref="rest"/>
+    <asyncLogger name="io.swagger" additivity="false" level="ERROR">
+      <appender-ref ref="main"/>
     </asyncLogger>
-     
-    <logger name="syncope.audit" additivity="false" level="DEBUG">
-      <appender-ref ref="audit"/>
-    </logger>
     
     <root level="INFO">
       <appender-ref ref="main"/>
