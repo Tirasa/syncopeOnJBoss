@@ -13,6 +13,7 @@ This projects assumes that you have
 
 <pre>
 $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
+$ git checkout 1_2_X
 </pre>
 
 #### build ####
