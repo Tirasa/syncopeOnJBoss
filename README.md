@@ -19,9 +19,9 @@ $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
 
 <pre>
 $ cd syncopeOnJBoss
-$ mvn clean package
+$ mvn -Dconf.directory=/tmp clean package
 </pre>
-(or `mvn -Pall clean package` if wanting to include Activiti, Swagger and Apache Camel features)
+(or `mvn -Dconf.directory=/tmp -Pall clean package` if wanting to include Activiti, Swagger and Apache Camel features)
 
 #### deploy ####
 
