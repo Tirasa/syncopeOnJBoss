@@ -7,6 +7,7 @@ Practical implementation of official advices at Syncope [documentation](https://
 
 This projects assumes that you have
  1. [Apache Maven 3.0](http://maven.apache.org) installed
+ 1. followed the [deployment directories convention](https://syncope.apache.org/docs/reference-guide.html#deployment-directories)
  1. a running Wildfly 10 instance, listening to port 8080
 
 #### clone ####
@@ -19,9 +20,11 @@ $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
 
 <pre>
 $ cd syncopeOnJBoss
-$ mvn -Dconf.directory=/tmp clean package
+$ mvn -Dconf.directory=/opt/syncope/conf \
+  -Dbundles.directory=/opt/syncope/bundles \
+  -Dlog.directory=/opt/syncope/log clean package
 </pre>
-(or `mvn -Dconf.directory=/tmp -Pall clean package` if wanting to include Activiti, Swagger and Apache Camel features)
+(add `-P all` to the command above if wanting to include Activiti, Swagger and Apache Camel features)
 
 #### deploy ####
 
