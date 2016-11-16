@@ -1,7 +1,9 @@
-Apache Syncope overlay to be run in Wildfy.<br/>
+## Run Apache Syncope on JBoss / Wildfy
+
 Practical implementation of official advices at Syncope [documentation](https://syncope.apache.org/docs/reference-guide.html#wildfly-9-and-10).
 
-**This branch is for Apache Syncope 2.0 / Wildfly 10**: looking for [Apache Syncope 1.2 / Wildfly 8.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_2_X) or [Apache Syncope 1.1 / JBoss AS 7.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_1_X)?
+**This branch is for Apache Syncope 2.0 / Wildfly 10**.<br/>
+Looking for [Apache Syncope 1.2 / Wildfly 8.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_2_X) or [Apache Syncope 1.1 / JBoss AS 7.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_1_X)?
 
 ## How to test ##
 
