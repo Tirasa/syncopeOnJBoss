@@ -21,10 +21,17 @@ $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
 #### build ####
 
 <pre>
+$ mkdir /opt/syncope
+$ mkdir /opt/syncope/bundles
+$ mkdir /opt/syncope/log
+$ mkdir /opt/syncope/conf
 $ cd syncopeOnJBoss
 $ mvn -Dconf.directory=/opt/syncope/conf \
   -Dbundles.directory=/opt/syncope/bundles \
   -Dlog.directory=/opt/syncope/log clean package
+$ cp core/target/classes/*properties /opt/syncope/conf/
+$ cp console/target/classes/*properties /opt/syncope/conf/
+$ cp enduser/target/classes/*properties /opt/syncope/conf/
 </pre>
 (add `-P all` to the command above if wanting to include Activiti, Swagger and Apache Camel features)
 
