@@ -11,6 +11,7 @@ This projects assumes that you have
  1. [Apache Maven 3.0](http://maven.apache.org) installed
  1. followed the [deployment directories convention](https://syncope.apache.org/docs/reference-guide.html#deployment-directories)
  1. a running Wildfly 10 instance, listening to port 8080
+ 1. a MariaDB database instance
 
 #### clone ####
 
