@@ -1,6 +1,8 @@
-# Run Apache Syncope on JBoss / Wildfy with MariaDB
+# Run Apache Syncope on JBoss / Wildfy with MariaDB (no container-managed DataSource)
 
 Practical implementation of official advices at Syncope [documentation](https://syncope.apache.org/docs/reference-guide.html#wildfly-9-and-10).
+
+Internal storage [configured for MariaDB](https://syncope.apache.org/docs/reference-guide.html#mariadb), _with application-managed DataSource_.
 
 **This branch is for Apache Syncope 2.0 / Wildfly 10**.<br/>
 Looking for [Apache Syncope 1.2 / Wildfly 8.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_2_X) or [Apache Syncope 1.1 / JBoss AS 7.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_1_X)?
@@ -11,7 +13,12 @@ This projects assumes that you have
  1. [Apache Maven 3.0](http://maven.apache.org) installed
  1. followed the [deployment directories convention](https://syncope.apache.org/docs/reference-guide.html#deployment-directories)
  1. a running Wildfly 10 instance, listening to port 8080
- 1. a MariaDB database instance
+ 1. a MariaDB database instance, with `my.cnf` featuring, under `[mysqld]`,
+ 
+  ```
+  binlog_format=MIXED
+  ```
+  The JDBC coordinates are defined in [core/src/main/resources/domains/Master.properties](https://github.com/Tirasa/syncopeOnJBoss/blob/MariaDB_NoContainerDataSource/core/src/main/resources/domains/Master.properties)
 
 #### clone ####
 
@@ -41,7 +48,6 @@ $ cp enduser/target/classes/*properties /opt/syncope/conf/
 
 ## Notes ##
  1. Currently on Apache Syncope 2.0.1
- 1. Internal storage configured for MariaDB, not using DataSource (details [here](https://github.com/Tirasa/syncopeOnJBoss/blob/MariaDB_NoContainerDataSource/core/src/main/resources/domains/Master.properties))
  1. Not listenig on 8080? Just put the correct port in <code>console/src/main/resources/console.properties</code> and <code>enduser/src/main/resources/enduser.properties</code>, re-build and re-deploy
 
 ## Need more info? ##
