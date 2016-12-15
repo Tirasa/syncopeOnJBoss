@@ -2,7 +2,7 @@
 
 Practical implementation of official advices at Syncope [documentation](https://syncope.apache.org/docs/reference-guide.html#wildfly-9-and-10).
 
-Internal storage [configured for MariaDB](https://syncope.apache.org/docs/reference-guide.html#mariadb), _with conainer-managed DataSource_.
+Internal storage [configured for MariaDB](https://syncope.apache.org/docs/reference-guide.html#mariadb), _with container-managed DataSource_.
 
 **This branch is for Apache Syncope 2.0 / Wildfly 10**.<br/>
 Looking for [Apache Syncope 1.2 / Wildfly 8.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_2_X) or [Apache Syncope 1.1 / JBoss AS 7.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_1_X)?
