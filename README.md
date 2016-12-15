@@ -1,8 +1,8 @@
-# Run Apache Syncope on JBoss / Wildfy with MariaDB (no container-managed DataSource)
+# Run Apache Syncope on JBoss / Wildfy with MariaDB (container-managed DataSource)
 
 Practical implementation of official advices at Syncope [documentation](https://syncope.apache.org/docs/reference-guide.html#wildfly-9-and-10).
 
-Internal storage [configured for MariaDB](https://syncope.apache.org/docs/reference-guide.html#mariadb), _with application-managed DataSource_.
+Internal storage [configured for MariaDB](https://syncope.apache.org/docs/reference-guide.html#mariadb), _with conainer-managed DataSource_.
 
 **This branch is for Apache Syncope 2.0 / Wildfly 10**.<br/>
 Looking for [Apache Syncope 1.2 / Wildfly 8.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_2_X) or [Apache Syncope 1.1 / JBoss AS 7.1](https://github.com/Tirasa/syncopeOnJBoss/tree/1_1_X)?
@@ -24,7 +24,7 @@ This projects assumes that you have
 
 <pre>
 $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
-$ git checkout MariaDB_NoContainerDataSource
+$ git checkout MariaDB_ContainerDataSource
 </pre>
 
 #### build ####
