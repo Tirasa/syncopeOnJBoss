@@ -1,4 +1,4 @@
-# Run Apache Syncope on JBoss / Wildfy with MariaDB (no container-managed DataSource)
+# Run Apache Syncope on JBoss / Wildfy with MariaDB (application-managed DataSource)
 
 Practical implementation of official advices at Syncope [documentation](https://syncope.apache.org/docs/reference-guide.html#wildfly-9-and-10).
 
