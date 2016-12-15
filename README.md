@@ -38,7 +38,50 @@ $ cp core/target/classes/*properties /opt/syncope/conf/
 $ cp console/target/classes/*properties /opt/syncope/conf/
 $ cp enduser/target/classes/*properties /opt/syncope/conf/
 </pre>
-(add `-P all` to the command above if wanting to include Activiti, Swagger and Apache Camel features)
+
+### configure Wildfly
+
+Assuming that Wildfy 10 is installed under `WILDFLY_HOME`:
+
+1. `mkdir $WILDFLY_HOME/modules/system/layers/base/org/mariadb/jdbc/main/`
+1. create `module.xml` file in this new directory, with content:
+
+  ```xml
+  <?xml version="1.0" encoding="UTF-8"?>
+
+<module xmlns="urn:jboss:module:1.3" name="org.mariadb.jdbc">
+
+    <resources>
+        <resource-root path="mariadb-java-client-1.5.5.jar"/>
+    </resources>
+    <dependencies>
+        <module name="javax.api"/>
+        <module name="javax.transaction.api"/>
+        <module name="javax.servlet.api" optional="true"/>
+    </dependencies>
+</module>
+  ```
+1. download [mariadb-java-client-1.5.5.jar](http://search.maven.org/remotecontent?filepath=org/mariadb/jdbc/mariadb-java-client/1.5.5/mariadb-java-client-1.5.5.jar) in this new directory
+1. add the following definition to `$WILDFLY_HOME/standalone/configuration/standalone.xml`, under `<datasources>`
+
+ ```xml
+<datasource jndi-name="java:jboss/datasources/syncopeDS" pool-name="syncopeDS" enabled="true" use-java-context="true">
+    <connection-url>jdbc:mariadb://localhost:3306/syncope?characterEncoding=UTF-8</connection-url>
+    <driver>mariadb</driver>
+    <security>
+        <user-name>syncope</user-name>
+        <password>syncope</password>
+    </security>
+</datasource>
+ ```
+
+1. add the following definition to `$WILDFLY_HOME/standalone/configuration/standalone.xml`, under `<drivers>`
+
+ ```xml
+<driver name="mariadb" module="org.mariadb.jdbc">
+    <xa-datasource-class>org.mariadb.jdbc.MySQLDataSource</xa-datasource-class>
+</driver>
+ ```
 
 #### deploy ####
 
