@@ -65,7 +65,8 @@ Assuming that Wildfy 10 is installed under `WILDFLY_HOME`:
 1. add the following definition to `$WILDFLY_HOME/standalone/configuration/standalone.xml`, under `<datasources>`
 
  ```xml
-<datasource jndi-name="java:jboss/datasources/syncopeDS" pool-name="syncopeDS" enabled="true" use-java-context="true">
+<datasource jndi-name="java:jboss/datasources/syncopeDS" pool-name="syncopeDS"
+            enabled="true" use-java-context="true">    
     <connection-url>jdbc:mariadb://localhost:3306/syncope?characterEncoding=UTF-8</connection-url>
     <driver>mariadb</driver>
     <security>
@@ -78,7 +79,7 @@ Assuming that Wildfy 10 is installed under `WILDFLY_HOME`:
 1. add the following definition to `$WILDFLY_HOME/standalone/configuration/standalone.xml`, under `<drivers>`
 
  ```xml
-<driver name="mariadb" module="org.mariadb.jdbc">
+<driver name="mariadb" module="org.mariadb.jdbc">    
     <xa-datasource-class>org.mariadb.jdbc.MySQLDataSource</xa-datasource-class>
 </driver>
  ```
