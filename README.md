@@ -24,7 +24,7 @@ This projects assumes that you have
 
 <pre>
 $ git clone git://github.com/Tirasa/syncopeOnJBoss.git
-$ git checkout MariaDB_NoContainerDataSource
+$ git checkout MariaDB_ApplicationDataSource
 </pre>
 
 #### build ####
