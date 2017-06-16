@@ -93,14 +93,9 @@ angular.module('self')
                     }
 
                     $scope.bindDateToModel = function (selectedDate, selectedTime) {
-                      if (selectedDate) {
+                      if (selectedDate && selectedTime) {
                         var extractedDate = selectedDate.toString().substring(0, 15);
-                        var extractedTime;
-                        if (selectedTime) {
-                          extractedTime = selectedTime.toString().substring(16);
-                        } else {
-                          extractedTime = '00:00:00';
-                        }
+                        var extractedTime = selectedTime.toString().substring(16);
                         var resultDate = extractedDate + ' ' + extractedTime;
                         var tmpdate = new Date(resultDate);
                         var milliseconds = tmpdate.getTime();
@@ -182,7 +177,7 @@ angular.module('self')
                       mstep: [1, 5, 10, 15, 25, 30]
                     };
 
-                    $scope.ismeridian = false;
+                    $scope.ismeridian = true;
                     $scope.toggleMode = function () {
                       $scope.ismeridian = !$scope.ismeridian;
                     };
