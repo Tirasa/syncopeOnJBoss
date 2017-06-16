@@ -19,7 +19,7 @@
 
 'use strict';
 angular.module('self')
-        .directive('dynamicPlainAttribute', function ($filter) {
+        .directive('dynamicPlainAttribute', function () {
           return {
             restrict: 'E',
             templateUrl: 'views/dynamicPlainAttribute.html',
@@ -28,7 +28,7 @@ angular.module('self')
               index: "=",
               user: "="
             },
-            controller: function ($scope, $element, $window) {
+            controller: function ($scope, $rootScope, $element, $window) {
               $scope.initAttribute = function (schema, index) {
                 switch (schema.type) {
                   case "Long":
@@ -38,14 +38,23 @@ angular.module('self')
                     break;
                   case "Enum":
                     $scope.enumerationValues = [];
+                    $scope.enumerationKeys = [];
 
                     //SYNCOPE-911 empty value option on non required attributes 
                     if (schema.mandatoryCondition !== "true") {
                       $scope.enumerationValues.push("");
+                      $scope.enumerationKeys.push("");
                     }
                     var enumerationValuesSplitted = schema.enumerationValues.toString().split(";");
                     for (var i = 0; i < enumerationValuesSplitted.length; i++) {
                       $scope.enumerationValues.push(enumerationValuesSplitted[i]);
+                    }
+                    //SYNCOPE-1024 enumeration keys mgmt
+                    if (schema.enumerationKeys) {
+                      var enumerationKeysSplitted = schema.enumerationKeys.toString().split(";");
+                      for (var i = 0; i < enumerationKeysSplitted.length; i++) {
+                        $scope.enumerationKeys.push(enumerationKeysSplitted[i]);
+                      }
                     }
                     $scope.user.plainAttrs[schema.key].values[index] = $scope.user.plainAttrs[schema.key].values[index]
                             || $scope.enumerationValues[0];
@@ -85,110 +94,44 @@ angular.module('self')
                     break;
 
                   case "Date":
-                    var dateInMs = $scope.user.plainAttrs[schema.key].values[index];
-                    if (dateInMs) {
-                      var temporaryDate = new Date(dateInMs * 1);
-                      $scope.selectedDate = temporaryDate;
-                      $scope.selectedTime = temporaryDate;
-                    }
+                    $scope.getType = function (x) {
+                      return typeof x;
+                    };
+                    $scope.isDate = function (x) {
+                      return x instanceof Date;
+                    };
+                    $scope.languageid = $rootScope.languages.selectedLanguage.id;
+                    $scope.isDateOnly = schema.conversionPattern.indexOf("H") === -1
+                            && schema.conversionPattern.indexOf("h") === -1;
+                    $scope.languageFormat = $scope.isDateOnly
+                            ? $rootScope.languages.selectedLanguage.format.replace(" HH:mm", "")
+                            : $rootScope.languages.selectedLanguage.format;
+                    $scope.languageCulture = $rootScope.languages.selectedLanguage.culture;
+                    // read date in milliseconds
+                    $scope.selectedDate = new Date($scope.user.plainAttrs[schema.key].values[index] * 1);
 
-                    $scope.bindDateToModel = function (selectedDate, selectedTime) {
-                      if (selectedDate && selectedTime) {
-                        var extractedDate = selectedDate.toString().substring(0, 15);
-                        var extractedTime = selectedTime.toString().substring(16);
-                        var resultDate = extractedDate + ' ' + extractedTime;
-                        var tmpdate = new Date(resultDate);
-                        var milliseconds = tmpdate.getTime();
-                        $scope.user.plainAttrs[schema.key].values[index] = milliseconds;
+                    $scope.bindDateToModel = function (selectedDate, extendedDate) {
+                      if (selectedDate) {
+                        // save date in milliseconds
+                        $scope.user.plainAttrs[schema.key].values[index] = new Date(extendedDate).getTime();
                       }
-                    };
-
-                    $scope.clear = function () {
-                      $scope.user.plainAttrs[schema.key].values[index] = null;
-                    };
-
-                    // Disable weekend selection
-                    $scope.disabled = function (date, mode) {
-                      // if you want to disable weekends:
-                      // return (mode === 'day' && (date.getDay() === 0 || date.getDay() === 6));
-                      return false;
-                    };
-
-                    $scope.toggleMin = function () {
-                      $scope.minDate = $scope.minDate ? null : new Date();
-                    };
-
-                    $scope.maxDate = new Date(2050, 5, 22);
-
-                    $scope.open = function ($event) {
-                      $scope.status.opened = true;
-                    };
-
-                    $scope.setDate = function (year, month, day) {
-                      $scope.user.plainAttrs[schema.key].values[index] = new Date(year, month, day);
-                    };
-
-                    $scope.dateOptions = {
-                      startingDay: 1
-                    };
-
-                    $scope.status = {
-                      opened: false
-                    };
-
-                    var tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    var afterTomorrow = new Date();
-                    afterTomorrow.setDate(tomorrow.getDate() + 2);
-                    $scope.events =
-                            [
-                              {
-                                date: tomorrow,
-                                status: 'full'
-                              },
-                              {
-                                date: afterTomorrow,
-                                status: 'partially'
-                              }
-                            ];
-
-                    $scope.getDayClass = function (date, mode) {
-                      if (mode === 'day') {
-                        var dayToCheck = new Date(date).setHours(0, 0, 0, 0);
-
-                        for (var i = 0; i < $scope.events.length; i++) {
-                          var currentDay = new Date($scope.events[i].date).setHours(0, 0, 0, 0);
-
-                          if (dayToCheck === currentDay) {
-                            return $scope.events[i].status;
-                          }
-                        }
-                      }
-
-                    };
-
-                    //TIME PICKER
-                    $scope.selectedTime = $scope.selectedDate;
-                    $scope.hstep = 1;
-                    $scope.mstep = 1;
-
-                    $scope.options = {
-                      hstep: [1, 2, 3],
-                      mstep: [1, 5, 10, 15, 25, 30]
-                    };
-
-                    $scope.ismeridian = true;
-                    $scope.toggleMode = function () {
-                      $scope.ismeridian = !$scope.ismeridian;
                     };
                     break;
 
                   case "Boolean":
                     $scope.user.plainAttrs[schema.key].values[index] =
-                            $scope.user.plainAttrs[schema.key].values[index] === "true" ? true : false;
+                            $scope.user.plainAttrs[schema.key].values[index] === "true" ? "true" : "false";
                     break;
 
                 }
+              };
+
+              $scope.customReadonly = function (schemaKey) {
+                return  $rootScope.customForm != null
+                        && $rootScope.customForm["PLAIN"] != null
+                        && $rootScope.customForm["PLAIN"]["attributes"] != null
+                        && $rootScope.customForm["PLAIN"]["attributes"][schemaKey] != null
+                        && $rootScope.customForm["PLAIN"]["attributes"][schemaKey].readonly;
               };
 
               $scope.$watch(function () {

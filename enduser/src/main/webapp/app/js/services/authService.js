@@ -35,22 +35,10 @@ angular.module('login')
                       });
             };
 
-            authService.logout = function () {
-              return $http
-                      .get('/syncope-enduser/api/logout')
-                      .then(function (response) {
-                        return response;
-                      }, function (response) {
-                        console.error("Something went wrong during logout, exit with status: ", response);
-                      });
-            };
-
-
             authService.islogged = function () {
               return $http
                       .get('/syncope-enduser/api/self/islogged')
                       .then(function (response) {
-//                        console.debug("user logged:", response.data);
                         return response.data;
                       }, function (response) {
                         console.error("error retrieving user login status");
@@ -59,5 +47,3 @@ angular.module('login')
 
             return authService;
           }]);
-
-

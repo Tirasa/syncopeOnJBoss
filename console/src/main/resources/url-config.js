@@ -21,7 +21,7 @@ var KISBPM = KISBPM || {};
 KISBPM.URL = {
   getModel: function (modelId) {
     return window.location.toString().substr(0, window.location.toString().indexOf('/activiti-modeler')) 
-            + "/workflowDefGET";
+            + "/workflowDefGET?modelId=" + modelId;
   },
   getStencilSet: function () {
     return window.location.toString().substr(0, window.location.toString().indexOf('/activiti-modeler')) 
@@ -29,6 +29,6 @@ KISBPM.URL = {
   },
   putModel: function (modelId) {
     return window.location.toString().substr(0, window.location.toString().indexOf('/activiti-modeler')) 
-            + "/workflowDefPUT";
+            + "/workflowDefPUT?modelId=" + modelId;
   }
 };

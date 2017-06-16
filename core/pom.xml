@@ -166,6 +166,16 @@ under the License.
       <testResource>
         <directory>src/test/resources</directory>
         <filtering>true</filtering>
+        <excludes>
+          <exclude>keystore</exclude>
+        </excludes>
+      </testResource>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>false</filtering>
+        <includes>
+          <include>keystore</include>
+        </includes>
       </testResource>
     </testResources>
   </build>
@@ -198,48 +208,24 @@ under the License.
         </dependency>
         
         <dependency>
+          <groupId>org.apache.syncope.ext.saml2sp</groupId>
+          <artifactId>syncope-ext-saml2sp-rest-cxf</artifactId>
+          <version>${syncope.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.syncope.ext.saml2sp</groupId>
+          <artifactId>syncope-ext-saml2sp-persistence-jpa</artifactId>
+          <version>${syncope.version}</version>
+        </dependency>
+
+        <dependency>
           <groupId>org.apache.syncope.ext</groupId>
           <artifactId>syncope-ext-swagger-ui</artifactId>
           <version>${syncope.version}</version>
         </dependency>
       </dependencies>
       
-      <build>
-        <plugins>
-          <!-- Adds Activiti test content -->
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>xml-maven-plugin</artifactId>
-            <inherited>true</inherited>
-            <executions>
-              <execution>
-                <phase>prepare-package</phase>
-                <goals>
-                  <goal>transform</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <transformationSets>
-                <transformationSet>
-                  <dir>${project.build.directory}/test-classes</dir>
-                  <includes>
-                    <include>domains/MasterContent.xml</include>
-                  </includes>
-                  <outputDir>${project.build.directory}/classes</outputDir>
-                  <stylesheet>${basedir}/src/test/resources/addActivitiToContent.xsl</stylesheet>
-                  <outputProperties>
-                    <outputProperty>
-                      <name>indent</name>
-                      <value>yes</value>
-                    </outputProperty>
-                  </outputProperties>
-                </transformationSet>
-              </transformationSets>
-            </configuration>
-          </plugin>                    
-        </plugins>
-        
+      <build>        
         <resources>
           <resource>
             <directory>src/main/resources</directory>

@@ -90,6 +90,15 @@ under the License.
   <CPlainAttrValue id="b5e8e79d-8039-4318-9698-fe5e181ebe98"
                    attribute_id="e5a712ad-53fd-4102-ba55-fb45caed5f7b" booleanValue="1"/>
 
+  <SyncopeSchema id="authentication.attributes"/>
+  <PlainSchema id="authentication.attributes" type="String" multivalue="1" uniqueConstraint="0" readonly="0"/>
+  <CPlainAttr id="577c6c4d-7149-43c2-9821-9ab4510effbd"
+              owner_id="cd64d66f-6fff-4008-b966-a06b1cc1436d" schema_id="authentication.attributes"/>
+  <CPlainAttrValue id="c13660b5-926c-47ea-946d-52db32dd492b"
+                   attribute_id="577c6c4d-7149-43c2-9821-9ab4510effbd" stringValue="username"/>
+  <CPlainAttrValue id="0f112dbd-00d4-441c-b732-331e7f348f8a"
+                   attribute_id="577c6c4d-7149-43c2-9821-9ab4510effbd" stringValue="email"/>
+
   <SyncopeSchema id="authentication.statuses"/>
   <PlainSchema id="authentication.statuses" type="String" multivalue="1" uniqueConstraint="0" readonly="0"/>
   <CPlainAttr id="888ae8e1-a295-4ee2-a15e-31dbf6dfc3f9"
@@ -133,6 +142,15 @@ under the License.
               owner_id="cd64d66f-6fff-4008-b966-a06b1cc1436d" schema_id="identity.recertification.day.interval"/>
   <CPlainAttrValue id="e5fa94db-b524-4309-908d-8198d0b3f77b"
                    attribute_id="bcfd7efc-0605-4b5e-b4bb-85c1d5f64bbb" longValue="-1"/>
+
+  <!--  JWT lifetime in minutes -->                   
+  <SyncopeSchema id="jwt.lifetime.minutes"/>
+  <PlainSchema id="jwt.lifetime.minutes" type="Long"
+               mandatoryCondition="true" multivalue="0" uniqueConstraint="0" readonly="0"/>
+  <CPlainAttr id="cfec3140-562d-459c-ac6a-e3e10758661d"
+              owner_id="cd64d66f-6fff-4008-b966-a06b1cc1436d" schema_id="jwt.lifetime.minutes"/>
+  <CPlainAttrValue id="447e2456-3ff5-41bc-8ff1-cbb0567546cb"
+                   attribute_id="cfec3140-562d-459c-ac6a-e3e10758661d" longValue="120"/>
   
   <AnyType id="USER" kind="USER"/>
   <AnyTypeClass id="BaseUser"/>
@@ -151,6 +169,10 @@ under the License.
   <Task DTYPE="SchedTask" id="e95555d2-1b09-42c8-b25b-f4c4ec598989" name="Identity Recertification Task"  active="0"
         jobDelegateClassName="org.apache.syncope.core.provisioning.java.job.IdentityRecertification"/>
   
+  <Task DTYPE="SchedTask" id="89de5014-e3f5-4462-84d8-d97575740baf" name="Access Token Cleanup Task"  active="1"
+        jobDelegateClassName="org.apache.syncope.core.provisioning.java.job.ExpiredAccessTokenCleanup"
+        cronExpression="0 0/5 * * * ?"/>
+
   <!-- Password reset notifications -->
   <MailTemplate id="requestPasswordReset"
                 textTemplate="Hi,
@@ -158,7 +180,7 @@ a password reset was request for ${user.getUsername()}.
 
 In order to complete this request, you need to visit this link:
 
-http://localhost:9080/syncope-enduser/app/#/confirmpasswordreset?token=${input.get(0).replaceAll(' ', '%20')}
+http://localhost:9080/syncope-enduser/app/#!/confirmpasswordreset?token=${input.get(0).replaceAll(' ', '%20')}
 
 If you did not request this reset, just ignore the present e-mail.
 
@@ -169,7 +191,7 @@ Best regards."
 a password reset was request for ${user.getUsername()}.&lt;/p&gt;
 
 &lt;p&gt;In order to complete this request, you need to visit this 
-&lt;a href=&quot;http://localhost:9080/syncope-enduser/app/#/confirmpasswordreset?token=${input.get(0).replaceAll(' ', '%20')}&quot;&gt;link&lt;/a&gt;&lt;/p&gt;.
+&lt;a href=&quot;http://localhost:9080/syncope-enduser/app/#!/confirmpasswordreset?token=${input.get(0).replaceAll(' ', '%20')}&quot;&gt;link&lt;/a&gt;&lt;/p&gt;.
 
 &lt;p&gt;If you did not request this reset, just ignore the present e-mail.&lt;/p&gt;
 
@@ -205,6 +227,6 @@ we are happy to inform you that the password request was successfully executed f
 
   <Report id="c3520ad9-179f-49e7-b315-d684d216dd97" name="reconciliation" active="1" template_id="empty"/>
   <ReportletConfInstance id="d6c2b475-4860-4eb1-8fde-618299c2a97c" report_id="c3520ad9-179f-49e7-b315-d684d216dd97" 
-                         serializedInstance='{"@class":"org.apache.syncope.common.lib.report.ReconciliationReportletConf","name":"dashboardReconciliationReportlet","userMatchingCond":null,"groupMatchingCond":null,"anyObjectMatchingCond":null,"features":["id","username","groupName"]}'/>
+                         serializedInstance='{"@class":"org.apache.syncope.common.lib.report.ReconciliationReportletConf","name":"dashboardReconciliationReportlet","userMatchingCond":null,"groupMatchingCond":null,"anyObjectMatchingCond":null,"features":["key","username","groupName"]}'/>
 
 </dataset>

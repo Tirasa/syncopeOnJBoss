@@ -21,11 +21,12 @@
 
 'use strict';
 
-angular.module("self").controller("UserController", ['$scope', '$rootScope', '$location', '$compile', "$state",
-  'AuthService', 'UserSelfService', 'SchemaService', 'RealmService', 'ResourceService', 'SecurityQuestionService',
-  'GroupService', 'AnyService', 'UserUtil', 'GenericUtil', "ValidationExecutor",
-  function ($scope, $rootScope, $location, $compile, $state, AuthService, UserSelfService, SchemaService, RealmService,
-          ResourceService, SecurityQuestionService, GroupService, AnyService, UserUtil, GenericUtil, ValidationExecutor) {
+angular.module("self").controller("UserController", ['$scope', '$rootScope', '$location', "$state",
+  'UserSelfService', 'SchemaService', 'RealmService', 'ResourceService', 'SecurityQuestionService',
+  'GroupService', 'AnyService', 'UserUtil', 'GenericUtil', 'ValidationExecutor', '$translate', '$filter',
+  function ($scope, $rootScope, $location, $state, UserSelfService, SchemaService, RealmService,
+          ResourceService, SecurityQuestionService, GroupService, AnyService, UserUtil, GenericUtil, ValidationExecutor,
+          $translate, $filter) {
 
     $scope.user = {};
     $scope.confirmPassword = {
@@ -64,23 +65,35 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
         // initialization is done here synchronously to have all schema fields populated correctly
         var schemaService;
         if (group) {
-          schemaService = SchemaService.getTypeExtSchemas(group);
+          /* 
+           * if you want to sort with custom JS function defined in put also a sorting function as last parameter
+           * e.g. $rootScope.attributesSorting.ASC
+           */
+          schemaService = SchemaService.getTypeExtSchemas(group, $rootScope.customForm);
         } else {
-          schemaService = SchemaService.getUserSchemas(anyTypeClass);
+          /* 
+           * if you want to sort with custom JS function defined in put also a sorting function as last parameter
+           * e.g. $rootScope.attributesSorting.ASC
+           */
+          schemaService = SchemaService.getUserSchemas(anyTypeClass, $rootScope.customForm);
         }
         schemaService.then(function (schemas) {
           if (group && (schemas.plainSchemas.length > 0 || schemas.derSchemas.length > 0 || schemas.virSchemas.length > 0))
             $scope.dynamicForm.groupSchemas.push(group);
-          //initializing user schemas values
+          /* 
+           * initializing user schemas values, i.e. USER attributes
+           */
           initSchemaValues(schemas);
         }, function (response) {
-          var errorMessage;
-          // parse error response 
+          // parse error response and log
           if (response !== undefined) {
-            errorMessage = response.split("ErrorMessage{{")[1];
-            errorMessage = errorMessage.split("}}")[0];
+            var errorMessages = response.toString().split("ErrorMessage{{");
+            if (errorMessages.length > 1) {
+              console.error("Error retrieving user schemas: ", response.toString().split("ErrorMessage{{")[1].split("}}")[0]);
+            } else {
+              console.error("Error retrieving user schemas: ", errorMessages);
+            }
           }
-          console.error("Error retrieving user schemas: ", errorMessage);
         });
       };
 
@@ -88,19 +101,37 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
         // initialize plain attributes
         for (var i = 0; i < schemas.plainSchemas.length; i++) {
           var plainSchemaKey = schemas.plainSchemas[i].key;
+          var initialAttributeValues = $rootScope.customForm != null
+                  && $rootScope.customForm["PLAIN"] != null
+                  && $rootScope.customForm["PLAIN"]["attributes"] != null
+                  && $rootScope.customForm["PLAIN"]["attributes"][plainSchemaKey] != null
+                  && $rootScope.customForm["PLAIN"]["attributes"][plainSchemaKey].defaultValues
+                  ? $rootScope.customForm["PLAIN"]["attributes"][plainSchemaKey].defaultValues
+                  : [];
           if (!$scope.user.plainAttrs[plainSchemaKey]) {
             $scope.user.plainAttrs[plainSchemaKey] = {
               schema: plainSchemaKey,
-              values: []
+              values: initialAttributeValues
             };
-            // initialize multivalue schema and support table: create mode, only first value
             if (schemas.plainSchemas[i].multivalue) {
-              $scope.dynamicForm.attributeTable[schemas.plainSchemas[i].key] = {
-                fields: [schemas.plainSchemas[i].key + "_" + 0]
-              };
+              // initialize multivalue schema and support table: create mode, default multivalues
+              if (initialAttributeValues.length > 0) {
+                // attribute create mode, init empty fields  
+                $scope.dynamicForm.attributeTable[plainSchemaKey] = {
+                  fields: []
+                };
+                for (var j = 0; j < initialAttributeValues.length; j++) {
+                  $scope.dynamicForm.attributeTable[plainSchemaKey].fields.push(plainSchemaKey + "_" + j);
+                }
+              } else {
+                // initialize multivalue schema and support table: create mode, only first value
+                $scope.dynamicForm.attributeTable[schemas.plainSchemas[i].key] = {
+                  fields: [schemas.plainSchemas[i].key + "_" + 0]
+                };
+              }
             }
           } else if (schemas.plainSchemas[i].multivalue) {
-            // initialize multivalue schema and support table: update mode, all provided values
+            // initialize multivalue attribute and support table: update mode, all provided values
             $scope.dynamicForm.attributeTable[schemas.plainSchemas[i].key] = {
               fields: [schemas.plainSchemas[i].key + "_" + 0]
             };
@@ -131,12 +162,12 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
               schema: virSchemaKey,
               values: []
             };
-            // initialize multivalue schema and support table: create mode, only first value
+            // initialize multivalue attribute and support table: create mode, only first value
             $scope.dynamicForm.virtualAttributeTable[schemas.virSchemas[i].key] = {
               fields: [schemas.virSchemas[i].key + "_" + 0]
             };
           } else {
-            // initialize multivalue schema and support table: update mode, all provided values
+            // initialize multivalue attribute and support table: update mode, all provided values
             $scope.dynamicForm.virtualAttributeTable[schemas.virSchemas[i].key] = {
               fields: [schemas.virSchemas[i].key + "_" + 0]
             };
@@ -198,7 +229,7 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
             return x < y ? -1 : x > y ? 1 : 0;
           });
         }, function (e) {
-          $scope.showError("An error occur during retrieving groups " + e, $scope.notification);
+          $scope.showError("An error occur while retrieving groups " + e, $scope.notification);
         });
       };
 
@@ -218,10 +249,10 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
               }
             }
           }, function (e) {
-            $scope.showError("An error occur during retrieving auxiliary classes " + e, $scope.notification);
+            $scope.showError("An error occur while retrieving auxiliary classes " + e, $scope.notification);
           });
         }, function (e) {
-          $scope.showError("An error occur during retrieving auxiliary classes " + e, $scope.notification);
+          $scope.showError("An error occur while retrieving auxiliary classes " + e, $scope.notification);
         });
       };
 
@@ -244,11 +275,11 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
           $scope.user = UserUtil.getUnwrappedUser(response);
           $scope.user.password = undefined;
 
-          
+
           $scope.initialSecurityQuestion = $scope.user.securityQuestion;
           // initialize already assigned resources
           $scope.dynamicForm.selectedResources = $scope.user.resources;
- 
+
           // initialize already assigned groups -- keeping the same structure of groups       
           for (var index in $scope.user.memberships) {
             $scope.dynamicForm.selectedGroups.push(
@@ -267,12 +298,12 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
             $scope.$emit("groupAdded", $scope.user.memberships[index].groupName);
           }
           if ($scope.user.mustChangePassword) {
-            $location.path('/mustchangepassword')
+            $location.path('/mustchangepassword');
           } else {
             initProperties();
           }
         }, function (e) {
-          console.error("Error during user read ", e);
+          console.error("Error while user read ", e);
         });
       };
 
@@ -371,10 +402,14 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
       var wrappedUser = UserUtil.getWrappedUser(user);
       if ($scope.createMode) {
         UserSelfService.create(wrappedUser, $scope.captchaInput.value).then(function (response) {
-          console.info("User " + $scope.user.username + " SUCCESSFULLY_CREATED");
+          console.debug("User " + $scope.user.username + " successfully CREATED");
           $rootScope.currentUser = $scope.user.username;
           $rootScope.currentOp = "SUCCESSFULLY_CREATED";
-          $state.go('success');
+          $scope.success({successMessage: $filter('translate')(["USER"]).USER
+                    + " "
+                    + $scope.user.username
+                    + " "
+                    + $filter('translate')(["SUCCESSFULLY_CREATED"]).SUCCESSFULLY_CREATED});
         }, function (response) {
           console.error("Error during user creation: ", response);
           var errorMessage;
@@ -387,16 +422,14 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
         });
       } else {
         UserSelfService.update(wrappedUser, $scope.captchaInput.value).then(function (response) {
-          console.debug("Updated user: ", response);
-          AuthService.logout().then(function (response) {
-            console.info("LOGOUT SUCCESS: ", response);
-            console.info("User " + $scope.user.username + " SUCCESSFULLY_UPDATED");
-            $rootScope.currentUser = $scope.user.username;
-            $rootScope.currentOp = "SUCCESSFULLY_UPDATED";
-            $state.go('success');
-          }, function () {
-            console.error("LOGOUT FAILED");
-          });
+          console.debug("User " + $scope.user.username + " successfully UPDATED");
+          $rootScope.currentUser = $scope.user.username;
+          $rootScope.currentOp = "SUCCESSFULLY_UPDATED";
+          $scope.logout({successMessage: $filter('translate')(["USER"]).USER
+                    + " "
+                    + $scope.user.username
+                    + " "
+                    + $filter('translate')(["SUCCESSFULLY_UPDATED"]).SUCCESSFULLY_UPDATED});
         }, function (response) {
           console.info("Error during user update: ", response);
           var errorMessage;
@@ -439,6 +472,7 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
           console.info("User " + $scope.user.username);
           $rootScope.currentUser = $scope.user.username;
           $rootScope.currentOp = "PASSWORD_UPDATED";
+          $translate.use($scope.languages.selectedLanguage.code);
           $state.go('success');
         }, function (response) {
           var errorMessage;
@@ -457,7 +491,6 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
     };
 
     $scope.confirmPasswordReset = function (user, event) {
-
       //getting the enclosing form in order to access to its controller                
       var currentForm = GenericUtil.getEnclosingFormController(event.target, $scope);
       if (currentForm != null) {
@@ -467,6 +500,7 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
           if (user && user.password && token) {
             UserSelfService.confirmPasswordReset({"newPassword": user.password, "token": token}).then(function (data) {
               $scope.showSuccess(data, $scope.notification);
+              $translate.use($scope.languages.selectedLanguage.code);
               $location.path('/self');
             }, function (response) {
               var errorMessage;
@@ -485,7 +519,6 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
     };
 
     $scope.changePassword = function (user, event) {
-
       //getting the enclosing form in order to access to its controller                
       var currentForm = GenericUtil.getEnclosingFormController(event.target, $scope);
       if (currentForm != null) {
@@ -510,17 +543,32 @@ angular.module("self").controller("UserController", ['$scope', '$rootScope', '$l
       }
     };
 
-    $scope.logout = function (message) {
-      AuthService.logout().then(function (response) {
-        console.info("Logout successfully");
-        $rootScope.endReached = false;
-        $location.path('/self');
-        if (message) {
-          $scope.showSuccess(message, $scope.notification);
-        }
-      }, function (response) {
-        console.error("Logout failed: ", response);
-      });
+    $scope.switchLanguage = function () {
+      $translate.use($rootScope.languages.selectedLanguage.code);
+      kendo.culture($rootScope.languages.selectedLanguage.code);
+    };
+
+    $scope.logout = function (params) {
+      $translate.use($scope.languages.selectedLanguage.code);
+      $rootScope.endReached = false;
+      var destination = params && params.successMessage
+              ? '../wicket/bookmarkable/org.apache.syncope.client.enduser.pages.Logout?successMessage=' + params.successMessage
+              : '../wicket/bookmarkable/org.apache.syncope.client.enduser.pages.Logout';
+      window.location.href = destination;
+    };
+
+    $scope.success = function (params) {
+      $rootScope.endReached = false;
+      var destination = params && params.successMessage
+              ? '../wicket/bookmarkable/org.apache.syncope.client.enduser.pages.HomePage?successMessage=' + params.successMessage
+              : '../wicket/bookmarkable/org.apache.syncope.client.enduser.pages.HomePage';
+      window.location.href = destination;
+    };
+
+    $scope.redirect = function () {
+      $translate.use($scope.languages.selectedLanguage.code);
+      $location.path('/self');
+      $rootScope.endReached = false;
     };
 
     $scope.finish = function (message) {

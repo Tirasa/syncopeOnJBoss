@@ -38,7 +38,7 @@ $ cp enduser/target/classes/*properties /opt/syncope/conf/
  1.  <code>console/target/syncope-enduser.war</code>
 
 ## Notes ##
- 1. Currently on Apache Syncope 2.0.1
+ 1. Currently on Apache Syncope 2.0.3
  1. Internal storage configured for in-memory H2 database instance, not using DataSource
  1. Not listenig on 8080? Just put the correct port in <code>console/src/main/resources/console.properties</code> and <code>enduser/src/main/resources/enduser.properties</code>, re-build and re-deploy
 

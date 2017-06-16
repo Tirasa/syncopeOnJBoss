@@ -22,11 +22,11 @@ under the License.
   <parent>
     <groupId>org.apache.syncope</groupId>
     <artifactId>syncope</artifactId>
-    <version xmlns="">2.0.1</version>
+    <version>2.0.3</version>
   </parent>
 
   <properties>
-    <syncope.version xmlns="">2.0.1</syncope.version>
+    <syncope.version>2.0.3</syncope.version>
     <secretKey>asdsda2233323uu</secretKey>
     <anonymousKey>sfsagdfsgd444</anonymousKey>
     

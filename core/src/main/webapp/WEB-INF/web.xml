@@ -28,8 +28,8 @@ under the License.
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>
-      /WEB-INF/classes/restCXFContext.xml
       classpath*:/*Context.xml
+      /WEB-INF/classes/restCXFContext.xml
     </param-value>
   </context-param>
 

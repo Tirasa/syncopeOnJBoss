@@ -22,6 +22,7 @@ under the License.
 <!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html lang="en" ng-app="SyncopeEnduserApp" class="no-js"> <!--<![endif]-->
   <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="description" content=""/>
@@ -62,7 +63,7 @@ under the License.
 
   <script src="../webjars/jquery/${jquery.version}/jquery.js"></script>
   <script src="../webjars/angular/${angular.version}/angular.js"></script>
-  <script src="../webjars/angular-ui-router/${angular-ui-router.version}/angular-ui-router.js"></script>
+  <script src="../webjars/angular-ui-router/${angular-ui-router.version}/release/angular-ui-router.js"></script>
   <script src="../webjars/angular-animate/${angular.version}/angular-animate.js"></script>
   <script src="../webjars/angular-resource/${angular.version}/angular-resource.js"></script>
   <script src="../webjars/angular-cookies/${angular.version}/angular-cookies.js"></script>
@@ -72,6 +73,9 @@ under the License.
   <script src="../webjars/kendo-ui-core/${kendo-ui-core.version}/js/kendo.ui.core.min.js"></script>
   <script src="../webjars/kendo-ui-core/${kendo-ui-core.version}/js/kendo.notification.min.js"></script>
   <script src="../webjars/kendo-ui-core/${kendo-ui-core.version}/js/kendo.angular.js"></script>
+  <script src="../webjars/kendo-ui-core/${kendo-ui-core.version}/js/cultures/kendo.culture.it.js"></script>
+  <script src="../webjars/kendo-ui-core/${kendo-ui-core.version}/js/cultures/kendo.culture.en.js"></script>
+  <script src="../webjars/kendo-ui-core/${kendo-ui-core.version}/js/cultures/kendo.culture.de.js"></script>
   <script src="../webjars/angular-treasure-overlay-spinner/${angular-treasure-overlay-spinner.version}/dist/treasure-overlay-spinner.min.js"></script>
   <script src="../webjars/ng-password-strength/${ng-password-strength.version}/dist/scripts/ng-password-strength.min.js"></script>
   <script type="text/javascript" src="../webjars/bootstrap-select/${bootstrap-select.version}/js/bootstrap-select.min.js"></script>
@@ -94,11 +98,11 @@ under the License.
   <script src="js/services/resourceService.js"></script>
   <script src="js/services/groupService.js"></script>
   <script src="js/services/anyService.js"></script>
+  <script src="js/services/saml2IdPService.js"></script>
   <!--controllers-->
   <script src="js/controllers/HomeController.js"></script>
   <script src="js/controllers/LoginController.js"></script>
   <script src="js/controllers/UserController.js"></script>
-  <script src="js/controllers/TailController.js"></script>
   <!--directives-->
   <script src="js/directives/dynamicPlainAttribute.js"></script>
   <script src="js/directives/dynamicDerivedAttribute.js"></script>

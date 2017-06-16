@@ -19,11 +19,23 @@
 
 'use strict';
 
-angular.module("self")
-        .controller("TailController", ['$scope', '$rootScope', '$location',
-                function ($scope, $rootScope, $location) {
-                  $scope.redirect = function () {
-                    $location.path('/self');
-                    $rootScope.endReached = false;
-                  };
-                }]);
+angular.module('self')
+        .factory('SAML2IdPService', ['$resource', '$q', '$http',
+          function ($resource, $q, $http) {
+
+            var saml2IdPService = {};
+
+            saml2IdPService.getAvailableSAML2IdPs = function () {
+              return $http.get("/syncope-enduser/api/saml2IdPs")
+                      .then(function (response) {
+                        return response.data;
+                      }, function (response) {
+                        console.error("Something went wrong during saml2Idp extesion retrieval, exit with status: ", response);
+                        return $q.reject(response.data || response.statusText);
+                      });
+            };
+
+            return saml2IdPService;
+          }]);
+
+

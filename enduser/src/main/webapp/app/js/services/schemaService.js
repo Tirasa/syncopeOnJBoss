@@ -20,17 +20,22 @@
 'use strict';
 
 angular.module('self')
-        .factory('SchemaService', ['$resource', '$q', '$http',
-          function ($resource, $q, $http) {
+        .factory('SchemaService', ['$q', '$http',
+          function ($q, $http) {
 
             var schemaService = {};
 
-            schemaService.getUserSchemas = function (anyTypeClass) {
+            schemaService.getUserSchemas = function (anyTypeClass, sortingFunction) {
               var classParam = anyTypeClass ? "?anyTypeClass=" + encodeURI(anyTypeClass) : "";
-
               return  $http.get("/syncope-enduser/api/schemas" + classParam)
                       .then(function (response) {
-                        return response.data;
+                        var schemas = response.data;
+                        if (sortingFunction) {
+                          schemas.plainSchemas.sort(sortingFunction);
+                          schemas.derSchemas.sort(sortingFunction);
+                          schemas.virSchemas.sort(sortingFunction);
+                        }
+                        return schemas;
                       }, function (response) {
                         console.error("Something went wrong during schema retrieval, exit with status: ", response);
                         return $q.reject(response.data || response.statusText);
@@ -39,7 +44,6 @@ angular.module('self')
 
             schemaService.getTypeExtSchemas = function (group) {
               var param = group ? "?group=" + encodeURI(group) : "";
-
               return  $http.get("/syncope-enduser/api/schemas" + param)
                       .then(function (response) {
                         return response.data;

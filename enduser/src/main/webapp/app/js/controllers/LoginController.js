@@ -18,29 +18,22 @@
  */
 
 'use strict';
-angular.module("login").controller("LoginController", ['$scope', '$http', '$location',
-  'AuthService', '$translate', '$translatePartialLoader', function ($scope, $http,
-          $location, AuthService, $translate) {
+angular.module("login").controller("LoginController", ['$scope', '$rootScope', '$http', '$location', 'AuthService',
+  function ($scope, $rootScope, $http, $location, AuthService) {
 
     $scope.credentials = {
       username: '',
       password: '',
       errorMessage: ''
     };
-    $scope.languages = {
-      availableLanguages: [
-        {id: '1', name: 'Italiano', code: 'it'},
-        {id: '2', name: 'English', code: 'en'},
-        {id: '3', name: 'Deutsch', code: 'de'}
-      ],
-      selectedLanguage: {id: '2', name: 'English', code: 'en'}
-    };
-    $scope.login = function (credentials) {
 
+    $scope.login = function (credentials) {
       AuthService.login($scope.credentials).then(function (user) {
         console.info("Login success for: ", user);
         // reset error message
         $scope.credentials.errorMessage = '';
+        // reset SAML 2.0 entityID
+        $rootScope.saml2idps.selected.entityID = null;
         // got to update page
         $location.path("/self/update");
       }, function (response) {
@@ -55,13 +48,11 @@ angular.module("login").controller("LoginController", ['$scope', '$http', '$loca
         $scope.showError($scope.credentials.errorMessage, $scope.notification);
       });
     };
+
     $scope.logout = function () {
-      AuthService.logout().then(function (response) {
-        console.info("Logout successfully");
-      }, function (response) {
-        console.info("Logout failed: ", response);
-      });
+      window.location.href = '../wicket/bookmarkable/org.apache.syncope.client.enduser.pages.Logout';
     };
+
     $scope.islogged = function () {
       AuthService.islogged().then(function (response) {
         console.debug("user login status detected", response);
@@ -76,22 +67,22 @@ angular.module("login").controller("LoginController", ['$scope', '$http', '$loca
     $scope.passwordReset = function () {
       $location.path("/passwordreset");
     };
-    $scope.errorAPI = function () {
-      $http.get("/syncope-enduser/api/error").success(function (data) {
-        console.debug("errorAPI response: ", data);
-      });
-    };
-    $scope.sampleAPI = function () {
-      $http.get("/syncope-enduser/api/user-self").success(function (data) {
-        console.debug("sampleAPI response: ", data);
-      });
-    };
-    $scope.schemaAPI = function () {
-      $http.get("/syncope-enduser/api/schema").success(function (data) {
-        console.debug("schemaAPI response: ", data);
-      });
-    };
-    $scope.switchLanguage = function () {
-      $translate.use($scope.languages.selectedLanguage.code);
-    };
+    $scope.$watch(function () {
+      return $location.search().successMessage;
+    }, function (successMessage) {
+      if (successMessage) {
+        var message = (' ' + successMessage).slice(1);
+        $scope.showSuccess(message, $scope.notification);
+        delete $location.$$search.successMessage;
+      }
+    });
+    $scope.$watch(function () {
+      return $location.search().errorMessage;
+    }, function (errorMessage) {
+      if (errorMessage) {
+        var message = (' ' + errorMessage).slice(1);
+        $scope.showError(message, $scope.notification);
+        delete $location.$$search.errorMessage;
+      }
+    });
   }]);
